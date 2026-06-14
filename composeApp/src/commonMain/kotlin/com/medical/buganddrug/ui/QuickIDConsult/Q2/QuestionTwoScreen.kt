@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
 import buganddrug_multiplateform.composeapp.generated.resources.info
+import buganddrug_multiplateform.composeapp.generated.resources.reportissue
 import com.medical.buganddrug.data.model.QoestionsModel.Q2Model.DiseaseIdentificationLists
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -311,7 +312,7 @@ fun QuestionTwoScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    painter = painterResource(Res.drawable.info),
+                                    painter = painterResource(Res.drawable.reportissue),
                                     contentDescription = "Report Icon",
                                     tint = MaterialTheme.colorScheme.primary
                                 )
@@ -508,7 +509,8 @@ fun <T> MultiSelectInputSearchableSpinnerDialog(
             shape = MaterialTheme.shapes.small,
             trailingIcon = {
                 IconButton(onClick = { showDialog = true }) {
-                    Icon(painter = painterResource(Res.drawable.arrow_drop_down), contentDescription = "Select")
+                    Icon(painter = painterResource(Res.drawable.arrow_drop_down), contentDescription = "Select",            modifier = Modifier.size(24.dp) // actual icon size
+                    )
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
@@ -674,7 +676,8 @@ fun <T> SingleSelectSearchableSpinnerDialog(
             trailingIcon = {
                 IconButton(onClick = { showDialog = true }) {
                     Icon(painter = painterResource(Res.drawable.arrow_drop_down)
-                        , contentDescription = "Select")
+                        , contentDescription = "Select",            modifier = Modifier.size(24.dp) // actual icon size
+                    )
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(

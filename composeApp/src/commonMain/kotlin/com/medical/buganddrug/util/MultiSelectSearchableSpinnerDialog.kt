@@ -56,7 +56,8 @@ fun <T> MultiSelectSearchableSpinnerDialog(
             trailingIcon = {
                 IconButton(onClick = { showDialog = true }) {
                     Icon(painter = painterResource(Res.drawable.arrow_drop_down),
-                        contentDescription = "Select")
+                        contentDescription = "Select",            modifier = Modifier.size(24.dp) // actual icon size
+                    )
                 }
                            },
             colors = OutlinedTextFieldDefaults.colors(

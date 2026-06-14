@@ -33,8 +33,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import buganddrug_multiplateform.composeapp.generated.resources.Res
-import buganddrug_multiplateform.composeapp.generated.resources.info
+import buganddrug_multiplateform.composeapp.generated.resources.app_icon
+import buganddrug_multiplateform.composeapp.generated.resources.exit
 import buganddrug_multiplateform.composeapp.generated.resources.inpatient
+import buganddrug_multiplateform.composeapp.generated.resources.insurance
+import buganddrug_multiplateform.composeapp.generated.resources.menu_dots
+import buganddrug_multiplateform.composeapp.generated.resources.outpatient
+import buganddrug_multiplateform.composeapp.generated.resources.reportissue
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
 import com.medical.buganddrug.util.ErrorAlertDialog
 
@@ -93,10 +98,10 @@ fun PatientTypeSelectionScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 val items = listOf(
-                    Triple("Bug Report", painterResource(Res.drawable.info),
+                    Triple("Bug Report", painterResource(Res.drawable.reportissue),
                         onBugReportClick),
-                    Triple("Privacy Policy", painterResource(Res.drawable.info), onPrivacyPolicyClick),
-                    Triple("Sign Out", painterResource(Res.drawable.info), onLogoutClick),
+                    Triple("Privacy Policy", painterResource(Res.drawable.insurance), onPrivacyPolicyClick),
+                    Triple("Sign Out", painterResource(Res.drawable.exit), onLogoutClick),
 
                 )
 
@@ -240,7 +245,7 @@ fun PatientTypeSelectionScreen(
                                     modifier = Modifier.weight(1f)
                                 )
                                 PatientTypeCard(
-                                    icon = painterResource(Res.drawable.info),
+                                    icon = painterResource(Res.drawable.outpatient),
                                     title = "Out Patients",
                                     isSelected = false,
                                     onClick = {
@@ -363,7 +368,9 @@ fun PatientTypeCard(
                 Icon(
                     painter = icon,
                     contentDescription = title,
-                    tint = contentColor,
+                    tint = Color.Unspecified, // keep original colors
+
+                    //  tint = contentColor,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -386,7 +393,7 @@ fun TitleLogo(modifier: Modifier = Modifier, small: Boolean = false) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(Res.drawable.info),
+            painter = painterResource(Res.drawable.app_icon),
             contentDescription = "App Logo",
             modifier = if (small)
                 Modifier
@@ -454,7 +461,7 @@ fun patientTopBar(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painterResource(Res.drawable.info),
+                    painterResource(Res.drawable.menu_dots),
                     contentDescription = "Menu",
                     tint = Color(0xFF0F172A),
                     modifier = Modifier.size(20.dp)
@@ -509,7 +516,7 @@ private fun DrawerHeaderElegant() {
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(Res.drawable.info),
+                painter = painterResource(Res.drawable.app_icon),
                 contentDescription = null,
                 modifier = Modifier
                     .size(64.dp)

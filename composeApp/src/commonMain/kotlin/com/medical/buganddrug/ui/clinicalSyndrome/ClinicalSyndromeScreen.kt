@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import buganddrug_multiplateform.composeapp.generated.resources.Res
+import buganddrug_multiplateform.composeapp.generated.resources.back_arrow
 import buganddrug_multiplateform.composeapp.generated.resources.info
 import com.medical.buganddrug.ui.QuickIDConsult.topBar
 import com.medical.buganddrug.util.ErrorAlertDialog
@@ -144,7 +145,7 @@ fun ClinicalSyndromeScreen(
                                     }
                                 ) {
                                     Icon(
-                                        painter = painterResource(Res.drawable.info),
+                                        painter = painterResource(Res.drawable.back_arrow),
                                         contentDescription = "Back",
                                         tint = Color(0xFF800080)
                                     )

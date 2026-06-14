@@ -112,7 +112,9 @@ fun ArtResistanceTreatmentScreen(onBackClick: () -> Unit = {}) {
                 IconButton(onClick = onBackClick) {
                     Icon(
                         painter = painterResource(Res.drawable.arrow_drop_down),
-                        contentDescription = "Back"
+                        modifier = Modifier.size(24.dp) // actual icon size
+,
+                                contentDescription = "Back"
                     )
                 }
             }
@@ -174,6 +176,8 @@ private fun ArtResistanceCard(entry: ArtResistanceEntry) {
                             Res.drawable.arrow_drop_down
                     ),
                     contentDescription = null,
+                    modifier = Modifier.size(24.dp) // actual icon size
+
                 )
             }
 

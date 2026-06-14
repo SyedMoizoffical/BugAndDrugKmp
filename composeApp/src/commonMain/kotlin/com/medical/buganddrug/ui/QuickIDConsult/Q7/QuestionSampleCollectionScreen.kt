@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import buganddrug_multiplateform.composeapp.generated.resources.Res
+import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
 import com.medical.buganddrug.ui.QuickIDConsult.Q3.SingleSelectSearchableSpinnerDialog
 import com.medical.buganddrug.ui.QuickIDConsult.topBar
@@ -97,7 +98,7 @@ fun QuestionSampleCollectionScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(
-                                painter = painterResource(Res.drawable.info),
+                                painter = painterResource(Res.drawable.first_aid_kit),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                                 modifier = Modifier.size(48.dp)

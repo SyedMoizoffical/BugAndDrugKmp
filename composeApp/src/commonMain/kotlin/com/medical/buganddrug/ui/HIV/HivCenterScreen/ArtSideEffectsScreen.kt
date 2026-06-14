@@ -141,7 +141,8 @@ fun ArtSideEffectsScreen(onBackClick: () -> Unit = {}) {
                 IconButton(onClick = onBackClick) {
                     Icon(
                         painter = painterResource(Res.drawable.arrow_drop_down),                        contentDescription = "Back",
-                        modifier = Modifier.rotate(180f)
+                        modifier = Modifier.rotate(180f).size(24.dp),
+
                     )
                 }
             }
@@ -202,7 +203,8 @@ private fun ArtSideEffectCard(entry: ArtSideEffectEntry) {
                         else
                             Res.drawable.arrow_drop_down
                     ),
-                    contentDescription = null,)
+                    contentDescription = null,            modifier = Modifier.size(24.dp) // actual icon size
+                )
             }
 
             AnimatedVisibility(

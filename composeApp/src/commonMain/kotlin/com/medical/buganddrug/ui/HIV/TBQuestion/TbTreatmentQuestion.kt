@@ -637,7 +637,8 @@ private fun ExpandableSection(
                         Res.drawable.arrow_drop_down
                 ),
                 contentDescription = "Toggle section",
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,            modifier = Modifier.size(24.dp) // actual icon size
+
             )
         }
 

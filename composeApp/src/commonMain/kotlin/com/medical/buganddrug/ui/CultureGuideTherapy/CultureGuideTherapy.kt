@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.unit.sp
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
+import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
 import com.medical.buganddrug.data.model.CultureTherapyGuideModel.CultureTherapyGuideDto
 import com.medical.buganddrug.util.ErrorAlertDialog
@@ -408,7 +409,7 @@ fun SelectedAntibioticTable(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.info),
+                    painter = painterResource(Res.drawable.first_aid_kit),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                     modifier = Modifier.size(48.dp)
@@ -561,7 +562,8 @@ fun <T> SingleSelectSearchableSpinnerDialog(
                 IconButton(onClick = { showDialog = true }) {
                     Icon(
                         painter = painterResource(Res.drawable.arrow_drop_down),
-
+                        modifier = Modifier.size(24.dp) // actual icon size
+,
                         contentDescription = "Select")
                 }
             },

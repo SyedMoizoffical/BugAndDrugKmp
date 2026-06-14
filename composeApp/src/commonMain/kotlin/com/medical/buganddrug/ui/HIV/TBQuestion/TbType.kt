@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
+import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
 import com.medical.buganddrug.ui.QuickIDConsult.Q4.QuestionFourViewModel
 import com.medical.buganddrug.ui.QuickIDConsult.Q4.SingleSelectSearchableSpinnerDialog
@@ -238,7 +239,7 @@ fun TbDetailCard(data: TbType) {
                     .padding(12.dp)
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.info),
+                    painter = painterResource(Res.drawable.first_aid_kit),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -316,8 +317,9 @@ fun TbQuestionItem(
 
             Icon(
                 painter = painterResource(Res.drawable.arrow_drop_down),                contentDescription = null,
-                modifier = Modifier.rotate(if (isSelected) 180f else 0f),
-                tint = MaterialTheme.colorScheme.primary
+                modifier = Modifier.rotate(if (isSelected) 180f else 0f).size(24.dp),
+                tint = MaterialTheme.colorScheme.primary,
+
             )
         }
     }

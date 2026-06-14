@@ -19,6 +19,7 @@ import com.medical.buganddrug.ui.QuickIDConsult.topBar
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import buganddrug_multiplateform.composeapp.generated.resources.Res
+import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
 import com.medical.buganddrug.data.model.QoestionsModel.Q5Model.AntibioticDose
 import com.medical.buganddrug.ui.QuickIDConsult.Q3.SingleSelectSearchableSpinnerDialog
@@ -207,7 +208,7 @@ fun QuestionFiveScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                painter = painterResource(Res.drawable.info),
+                                painter = painterResource(Res.drawable.first_aid_kit),
                                 contentDescription = "Table Icon",
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer
                             )

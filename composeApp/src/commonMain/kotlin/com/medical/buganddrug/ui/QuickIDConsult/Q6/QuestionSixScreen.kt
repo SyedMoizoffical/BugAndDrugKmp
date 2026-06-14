@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import buganddrug_multiplateform.composeapp.generated.resources.Res
+import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
 
 import com.medical.buganddrug.data.model.QoestionsModel.Q5Model.AntibioticDose
@@ -152,7 +153,7 @@ private fun AntibioticDetailCard(selectedAntibiotic: String, data: List<Antibiot
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.info),
+                    painter = painterResource(Res.drawable.first_aid_kit),
                     contentDescription = "Info Icon",
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -276,7 +277,7 @@ private fun EmptyPlaceholderCard() {
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
-                painter = painterResource(Res.drawable.info),
+                painter = painterResource(Res.drawable.first_aid_kit),
                 contentDescription = "Placeholder Icon",
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                 modifier = Modifier.size(48.dp)

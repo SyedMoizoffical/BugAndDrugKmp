@@ -30,7 +30,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
+import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
+import buganddrug_multiplateform.composeapp.generated.resources.reportissue
 
 import com.medical.buganddrug.ui.QuickIDConsult.topBar
 import com.medical.buganddrug.ui.theme.cardLightBackgroundColor
@@ -545,7 +547,7 @@ fun QuestionThreeScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                painter = painterResource(Res.drawable.info),
+                                painter = painterResource(Res.drawable.reportissue),
 
                                 contentDescription = "Report Icon",
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -647,7 +649,7 @@ fun QuestionThreeScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
-                                        painter = painterResource(Res.drawable.info),
+                                        painter = painterResource(Res.drawable.first_aid_kit),
 
                                         contentDescription = "Table Icon",
                                         tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -783,7 +785,8 @@ fun <T> SingleSelectSearchableSpinnerDialog(
             shape = MaterialTheme.shapes.medium,
             trailingIcon = {
                 IconButton(onClick = { showDialog = true }) {
-                    Icon(painter = painterResource(Res.drawable.arrow_drop_down), contentDescription = "Select")
+                    Icon(painter = painterResource(Res.drawable.arrow_drop_down), contentDescription = "Select",            modifier = Modifier.size(24.dp) // actual icon size
+                    )
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(

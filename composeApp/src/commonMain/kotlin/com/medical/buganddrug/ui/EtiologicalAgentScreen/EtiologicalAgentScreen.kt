@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
+import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
 import com.medical.buganddrug.data.model.QoestionsModel.Q2Model.EtilogicalAgentsLists
 import com.medical.buganddrug.ui.QuickIDConsult.topBar
@@ -141,7 +142,7 @@ fun EtiologicalAgentScreen(
                                             .padding(12.dp)
                                     ) {
                                         Icon(
-                                            painter = painterResource(Res.drawable.info),
+                                            painter = painterResource(Res.drawable.first_aid_kit),
                                             contentDescription = null,
                                             tint = MaterialTheme.colorScheme.primary
                                         )
@@ -183,7 +184,7 @@ fun EtiologicalAgentScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Icon(
-                                        painter = painterResource(Res.drawable.info),
+                                        painter = painterResource(Res.drawable.first_aid_kit),
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                                         modifier = Modifier.size(48.dp)
@@ -306,7 +307,9 @@ fun <T> SingleSelectSearchableSpinnerDialog(
             trailingIcon = {
                 IconButton(onClick = { showDialog = true }) {
                     Icon(painter = painterResource(Res.drawable.arrow_drop_down),
-                        contentDescription = "Select")
+                        modifier = Modifier.size(24.dp) // actual icon size
+,
+                                contentDescription = "Select")
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(

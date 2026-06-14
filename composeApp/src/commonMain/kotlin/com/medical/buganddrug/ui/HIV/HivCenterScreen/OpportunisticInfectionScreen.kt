@@ -186,7 +186,8 @@ fun OpportunisticInfectionScreen(onBackClick: () -> Unit = {}) {
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = onBackClick) {
-                    Icon(painter = painterResource(Res.drawable.arrow_drop_down), contentDescription = "Back")
+                    Icon(painter = painterResource(Res.drawable.arrow_drop_down), contentDescription = "Back",            modifier = Modifier.size(24.dp) // actual icon size
+                    )
                 }
             }
         }
@@ -239,6 +240,8 @@ private fun OpportunisticInfectionCard(entry: OpportunisticInfectionEntry) {
                             Res.drawable.arrow_drop_down
                     ),
                     contentDescription = null,
+                    modifier = Modifier.size(24.dp) // actual icon size
+
                 )
             }
 

@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import buganddrug_multiplateform.composeapp.generated.resources.Res
+import buganddrug_multiplateform.composeapp.generated.resources.app_icon
 import buganddrug_multiplateform.composeapp.generated.resources.info
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
 import com.medical.buganddrug.ui.onboarding.loginScreen.AuthViewModel
@@ -45,7 +46,7 @@ fun Title(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(Res.drawable.info),
+            painter = painterResource(Res.drawable.app_icon),
             contentDescription = "App Logo",
             modifier = Modifier
                 .size(140.dp)
@@ -174,7 +175,7 @@ fun WelcomeScreen(
                     ) {
 
                         Image(
-                            painter = painterResource(Res.drawable.info),
+                            painter = painterResource(Res.drawable.app_icon),
                             contentDescription = "App Logo",
                             modifier =
                                 Modifier.size(120.dp)

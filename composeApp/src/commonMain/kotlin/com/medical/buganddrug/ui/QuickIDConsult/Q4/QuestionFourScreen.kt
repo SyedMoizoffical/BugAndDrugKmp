@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
+import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
 
 import com.medical.buganddrug.data.model.QoestionsModel.Q4Model.Isolation
@@ -149,6 +150,8 @@ fun QuestionFourScreen(
 
                                             contentDescription = null,
                                             tint = MaterialTheme.colorScheme.primary
+                                            ,
+                                            modifier = Modifier.size(24.dp)
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
@@ -312,7 +315,8 @@ fun <T> SingleSelectSearchableSpinnerDialog(
             shape = MaterialTheme.shapes.medium,
             trailingIcon = {
                 IconButton(onClick = { showDialog = true }) {
-                    Icon(painter = painterResource(Res.drawable.arrow_drop_down), contentDescription = "Select")
+                    Icon(painter = painterResource(Res.drawable.arrow_drop_down), contentDescription = "Select",            modifier = Modifier.size(24.dp) // actual icon size
+                    )
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(

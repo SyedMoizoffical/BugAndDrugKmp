@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import buganddrug_multiplateform.composeapp.generated.resources.Res
+import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
 import com.medical.buganddrug.ui.QuickIDConsult.Q4.QuestionFourViewModel
 import com.medical.buganddrug.ui.QuickIDConsult.Q4.SingleSelectSearchableSpinnerDialog
@@ -423,7 +424,8 @@ fun VaccineDetailCard(data: VaccineIndication) {
                 Icon(
                     painter = painterResource(Res.drawable.info),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -495,7 +497,7 @@ fun EmptyCardMessage() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                painter = painterResource(Res.drawable.info),
+                painter = painterResource(Res.drawable.first_aid_kit),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                 modifier = Modifier.size(48.dp)

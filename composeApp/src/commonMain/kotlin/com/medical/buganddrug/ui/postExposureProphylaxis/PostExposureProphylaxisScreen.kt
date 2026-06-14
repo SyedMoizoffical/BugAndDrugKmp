@@ -126,7 +126,8 @@ fun PostExposureProphylaxisScreen(
                                         Icon(
                                             painter = painterResource(Res.drawable.info),
                                             contentDescription = "Table Icon",
-                                            tint = MaterialTheme.colorScheme.primary
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(24.dp)
                                         )
                                         Spacer(Modifier.width(8.dp))
                                         Text(
@@ -244,7 +245,9 @@ fun <T> SingleSelectSearchableSpinnerDialog(
                 IconButton(onClick = { showDialog = true }) {
                     Icon(
                         painter = painterResource(Res.drawable.arrow_drop_down),
-                        contentDescription = "Select"
+                        contentDescription = "Select",
+                        modifier = Modifier.size(24.dp) // actual icon size
+
                     )
                 }
             },

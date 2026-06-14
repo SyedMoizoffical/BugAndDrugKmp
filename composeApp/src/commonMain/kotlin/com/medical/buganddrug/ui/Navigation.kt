@@ -193,7 +193,7 @@ object AppScreens {
             val navigator = LocalNavigator.currentOrThrow
             val vm: QuestionViewModel = koinInject()
 
-            QuestionOneScreen(vm, {},  patientType,{ navigator?.pop() })
+            QuestionOneScreen(vm, {navigator?.pop() },  patientType,{ navigator?.pop() })
         }
     }
 
@@ -281,7 +281,7 @@ object AppScreens {
         @Composable override fun Content() {
             val navigator = LocalNavigator.currentOrThrow
             val vm: AntimicrobialSpectrumViewModel = koinInject()
-            AntimicrobialSpectrumScreen(vm, {},  patientType,{ navigator?.pop() },)
+            AntimicrobialSpectrumScreen(vm, {navigator?.pop() },  patientType,{ navigator?.pop() },)
         }
     }
 

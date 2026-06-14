@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import buganddrug_multiplateform.composeapp.generated.resources.Res
+import buganddrug_multiplateform.composeapp.generated.resources.back_arrow
 import buganddrug_multiplateform.composeapp.generated.resources.info
 import org.jetbrains.compose.resources.painterResource
 
@@ -172,11 +173,15 @@ fun topBar(
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
             ) {
-                IconButton(onClick = onBackClick) {
+                IconButton(onClick = onBackClick,
+                    modifier = Modifier.size(48.dp) // touch area (recommended)
+                ) {
                     Icon(
-                        painter = painterResource(Res.drawable.info),
+                        painter = painterResource(Res.drawable.back_arrow),
                         contentDescription = "Back",
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp) // actual icon size
+
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))

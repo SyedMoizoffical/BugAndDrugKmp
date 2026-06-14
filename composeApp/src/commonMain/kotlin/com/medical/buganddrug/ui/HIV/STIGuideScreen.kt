@@ -269,7 +269,9 @@ Abstain from sexual activity for 7 days after treatment and until asymptomatic."
                     Icon(
                         painter = painterResource(Res.drawable.search),
                         contentDescription = null,
-                        tint = Color(0xFF800080)
+                        tint = Color(0xFF800080),
+                        modifier = Modifier.size(24.dp) // actual icon size
+
                     )
                 },
                 singleLine = true,

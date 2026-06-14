@@ -179,7 +179,9 @@ private fun DrugSideEffectCard(entry: DrugSideEffect) {
                             Res.drawable.arrow_drop_down
                     ),
                     contentDescription = if (expanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp) // actual icon size
+
                 )
             }
 
