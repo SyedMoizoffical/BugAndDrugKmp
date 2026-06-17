@@ -41,7 +41,6 @@ import com.medical.buganddrug.ui.onboarding.OutpatientQuestion
 import com.medical.buganddrug.ui.onboarding.PatientTypeSelectionScreen
 import com.medical.buganddrug.ui.onboarding.WelcomeScreen
 import com.medical.buganddrug.ui.onboarding.loginScreen.AuthViewModel
-//import com.medical.buganddrug.ui.patientInfoScreen.PatientInfoInputScreen
 import com.medical.buganddrug.ui.patientInfoScreen.QuestionTwoScreen
 import com.medical.buganddrug.ui.postExposureProphylaxis.PostExposureProphylaxisScreen
 import com.medical.buganddrug.ui.postExposureProphylaxis.PostExposureProphylaxisViewModel
@@ -50,6 +49,7 @@ import com.medical.buganddrug.ui.QuickIDConsult.QuickIDConsults
 import com.medical.buganddrug.ui.onboarding.LogoutScreen.LogoutViewModel
 import com.medical.buganddrug.ui.patientInfoScreen.PatientInfoInputScreen
 import com.medical.buganddrug.ui.patientInfoScreen.UserViewModel
+import com.medical.buganddrug.ui.onboarding.NavDrawer.bugReportScreen.BugReportScreen
 
 object AppScreens {
 
@@ -346,7 +346,7 @@ object AppScreens {
         @Composable override fun Content() {
             val navigator = LocalNavigator.currentOrThrow
             val vm: BugReportViewModel = koinInject()
-            //BugReportScreen(vm) { navigator?.pop() }
+            BugReportScreen({ navigator?.pop() },vm)
         }
     }
 

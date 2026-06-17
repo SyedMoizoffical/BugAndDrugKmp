@@ -46,31 +46,24 @@ private val sharedPrefs: SharedPreferenceManager
 
             try {
 
-                val imageParts = images.take(5).mapIndexed { index, bytes ->
+                    val result = repository.postBugReport(
+                        description = description,
+                        email = email,
+                        status = "pending",
+                        devicesDetail = deviceInfo,
+                        images = images
+                    )
 
-//                    repository.createImagePart(
-//                        name = "images",
-//                        fileName = "image$index.jpg",
-//                        bytes = bytes
-//                    )
+
+
+                result.onSuccess {
+                    _success.value = true
+                    _errorMessage.value = null
                 }
 
-//                val result = repository.postBugReport(
-//                    description = description,
-//                    email = email,
-//                    status = "pending",
-//                    devicesDetail = deviceInfo,
-//                    images = imageParts
-//                )
-//
-//                result.onSuccess {
-//                    _success.value = true
-//                    _errorMessage.value = null
-//                }
-//
-//                result.onFailure {
-//                    _errorMessage.value = it.message
-//                }
+                result.onFailure {
+                    _errorMessage.value = it.message
+                }
 
             } catch (e: Exception) {
                 _errorMessage.value = e.message

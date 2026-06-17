@@ -7,3 +7,8 @@ class AndroidPlatform : Platform {
 }
 
 actual fun getPlatform(): Platform = AndroidPlatform()
+actual fun pickImages(
+    onImagesPicked: (List<ByteArray>) -> Unit
+) {
+    AndroidImagePicker.launch(onImagesPicked)
+}

@@ -146,23 +146,25 @@ class ApiService(
         return client.submitFormWithBinaryData(
             url = "PostBugReport",
             formData = formData {
+
                 append("description", description)
                 append("email", email)
                 append("status", status)
                 append("devicesDetail", devicesDetail)
-//
-//                images.forEachIndexed { index, bytes ->
-//                    append(
-//                        key = "images",
-//                        value = bytes,
-//                        headers = Headers.build {
-//                            append(
-//                                HttpHeaders.ContentDisposition,
-//                                "filename=image_$index.jpg"
-//                            )
-//                        }
-//                    )
-//                }
+
+                images.take(5).forEachIndexed { index, bytes ->
+                    append(
+                        key = "images",
+                        value = bytes,
+                        headers = Headers.build {
+                            append(
+                                HttpHeaders.ContentDisposition,
+                                "form-data; name=\"images\"; filename=\"image_$index.jpg\""
+                            )
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                        }
+                    )
+                }
             }
         ).body()
     }

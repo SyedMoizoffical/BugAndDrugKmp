@@ -57,7 +57,8 @@ kotlin {
             implementation("com.russhwolf:multiplatform-settings-no-arg:1.3.0")   // for Settings()
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
             implementation("io.ktor:ktor-client-logging:2.3.12")
-       
+            implementation(libs.coil.compose)
+            implementation(libs.coil.compose.core)
 
         }
 
