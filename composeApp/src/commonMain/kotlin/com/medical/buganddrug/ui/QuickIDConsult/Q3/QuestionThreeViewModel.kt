@@ -5,8 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.AntibioticDose
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.IvToPOs
 import com.medical.buganddrug.data.model.QoestionsModel.Q3Model.GetIVtoPOsData
-import com.medical.buganddrug.data.model.QoestionsModel.Q5Model.AntibioticDose
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
 import com.medical.buganddrug.data.repository.QuestionsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,7 @@ class QuestionThreeViewModel (
     val loading: StateFlow<Boolean> = _loading
 
 
-    var getSyndromeIdentificationData by mutableStateOf<GetIVtoPOsData?>(null) // ✅ since repo returns Result<Unit>
+    var getSyndromeIdentificationData by mutableStateOf<IvToPOs?>(null) // ✅ since repo returns Result<Unit>
         private set
     var antibioticDoses by mutableStateOf<List<AntibioticDose>>(emptyList())
         private set
@@ -38,18 +39,16 @@ class QuestionThreeViewModel (
         viewModelScope.launch {
             _loading.value = true
 
-            println(sharedPrefs.getPatientData())
 
+            val result = repository.getLocalIvToPOs()
 
-            val result = repository.getQ3Data()
-
-            result.onSuccess {
+            if(result != null) {
                 _loading.value = false
-                getSyndromeIdentificationData = it // ✅ Unit
+                getSyndromeIdentificationData = result // ✅ Unit
                 _errorMessage.value = null
-            }.onFailure { throwable ->
+            }else {
                 _loading.value = false
-                _errorMessage.value = throwable.message
+                _errorMessage.value = "no data found"
             }
 
 
@@ -59,14 +58,14 @@ class QuestionThreeViewModel (
     fun getAntibiotic() {
         viewModelScope.launch {
             _loading.value = true
-            val result = repository.getAntibiotic()
-            result.onSuccess {
+            val result = repository.getLocalCreatinineClearance()
+            if (result != null) {
                 _loading.value = false
-                antibioticDoses = it!!.antibioticDoses
+                antibioticDoses = result.antibioticDoses
                 _errorMessage.value = null
-            }.onFailure { throwable ->
+            }else {
                 _loading.value = false
-                _errorMessage.value = throwable.message
+                _errorMessage.value = "no data found"
             }
         }
     }

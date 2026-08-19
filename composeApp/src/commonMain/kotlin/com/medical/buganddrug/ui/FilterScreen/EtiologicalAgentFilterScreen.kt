@@ -1,0 +1,442 @@
+package com.medical.buganddrug.ui.FilterScreen
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import buganddrug_multiplateform.composeapp.generated.resources.Res
+import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
+import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.EtilogicalAgent
+import com.medical.buganddrug.ui.EtiologicalAgentScreen.EtiologicalAgentScreenViewModel
+import com.medical.buganddrug.ui.QuickIDConsult.topBar
+import com.medical.buganddrug.util.ErrorAlertDialog
+import com.medical.buganddrug.util.LoadingOverlay
+import org.jetbrains.compose.resources.painterResource
+
+@Composable
+fun EtiologicalAgentFilterScreen(
+    viewModel: EtiologicalAgentScreenViewModel,
+    onSubmit: () -> Unit = {},
+    onBackClick: () -> Unit = {},
+    organismId: Int? = null,
+    organismName: String? = null
+) {
+    val scrollState = rememberScrollState()
+    LaunchedEffect(Unit) { viewModel.getEtiologicalAgent() }
+
+    val response = viewModel.getEtiologicalAgent
+    val isLoading by viewModel.loading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    var selectedConditionId by remember(organismId) {
+        mutableStateOf<Int?>(if (organismId != null && organismId != 0) organismId else null)
+    }
+
+    LaunchedEffect(response, organismId, organismName) {
+        if (selectedConditionId == null && response != null) {
+            val isolations = response.etilogicalAgents
+            var matched: com.medical.buganddrug.data.model.LocalStorageDatamodel.EtilogicalAgent? = null
+
+            if (!organismName.isNullOrBlank()) {
+                val nameToMatch = organismName.trim()
+                matched = isolations.find {
+                    val org = it.organism?.trim() ?: ""
+                    org.equals(nameToMatch, ignoreCase = true) ||
+                    org.replace("-", " ").equals(nameToMatch.replace("-", " "), ignoreCase = true) ||
+                    org.contains(nameToMatch, ignoreCase = true) ||
+                    nameToMatch.contains(org, ignoreCase = true)
+                }
+            }
+
+            if (matched == null && organismId != null && organismId != 0) {
+                matched = isolations.find { it.id == organismId }
+            }
+
+            if (matched != null) {
+                selectedConditionId = matched.id
+            }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            topBar(
+                topic = "Etiological Agent",
+                patientType = "Select Organism",
+                onBackClick = onBackClick
+            )
+        },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                      Brush.verticalGradient(
+                        listOf(
+                            Color(0xFFFFFFFF),
+                            Color(0xFFF3E5F5)   // Very soft lavender
+                        )
+                    )
+                )
+                .padding(innerPadding)
+        ) {
+            when {
+                isLoading -> LoadingOverlay()
+
+                errorMessage != null -> {
+                    ErrorAlertDialog(
+                        errorMessage = errorMessage,
+                        onDismiss = { viewModel.clearError() }
+                    )
+                }
+
+                response != null -> {
+                    val isolations = response.etilogicalAgents
+                    val conditions = isolations.map { it.organism!!.trim() to it.id }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(18.dp)
+                    ) {
+//                        Text(
+//                            text = "Select a Organism",
+//                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+//                            color = MaterialTheme.colorScheme.primary
+//                        )
+//
+//                        // Dropdown
+//                        SingleSelectSearchableSpinnerDialog(
+//                            label = "Organism",
+//                            items = conditions,
+//                            itemLabel = { it.first },
+//                            selectedItem = selectedConditionId,
+//                            onItemSelected = { item -> selectedConditionId = item?.second }
+//                        )
+
+                        // Details card for selected condition
+                        val selectedIsolation =
+                            isolations.find { it.id == selectedConditionId }
+
+                        if (selectedIsolation != null) {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .border(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outlineVariant,
+                                        RoundedCornerShape(16.dp)
+                                    )
+                                    .background(MaterialTheme.colorScheme.surface),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(Color(0xFFEEDCFF))
+                                            .padding(12.dp)
+                                    ) {
+                                        Icon(
+                    painter = painterResource(Res.drawable.first_aid_kit),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                    modifier = Modifier.size(48.dp)
+                )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Organism Details: ${selectedIsolation.type}",
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                        item {
+                                            IsolationDetailCard(selectedIsolation)
+                                        }
+                                    }
+                                }
+                            }
+                        }else
+                        {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 20.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(16.dp),
+                                elevation = CardDefaults.cardElevation(4.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(24.dp),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.first_aid_kit),
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                        modifier = Modifier.size(48.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = "Please select a condition to view isolation details",
+                                        textAlign = TextAlign.Center,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                        fontSize = 16.sp,
+                                        lineHeight = 22.sp
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+//                        // Submit Button
+//                        Button(
+//                            onClick = onSubmit,
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .height(50.dp)
+//                                .clip(RoundedCornerShape(12.dp)),
+//                            enabled = selectedConditionId != null,
+//                            colors = ButtonDefaults.buttonColors(
+//                                containerColor = MaterialTheme.colorScheme.primary
+//                            )
+//                        ) {
+//                            Text(
+//                                text = "Continue",
+//                                style = MaterialTheme.typography.titleMedium.copy(
+//                                    fontWeight = FontWeight.SemiBold
+//                                )
+//                            )
+//                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun IsolationDetailCard(option: EtilogicalAgent?) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp)),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            InfoRow("Type", option?.type ?: "N/A")
+            InfoRow("Infections Caused", option?.infectionsCaused ?: "N/A")
+            InfoRow("First-line Treatment", option?.firstlineTreatment ?: "N/A")
+            InfoRow("Alternative Treatment Options", if (option?.alternativeTreatmentOptions.isNullOrBlank()) "N/A" else option!!.alternativeTreatmentOptions!!)
+        }
+    }
+}
+
+@Composable
+fun InfoRow(label: String, value: String) {
+    Column {
+        Text(
+            text = label,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        if (value == "N/A") {
+            Text(
+                text = "N/A",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color(0xFF9E9E9E),
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                )
+            )
+        } else {
+            com.medical.buganddrug.util.ClickableDiseaseText(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    lineHeight = 22.sp
+                )
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            thickness = 0.5.dp,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+    }
+}
+
+
+@Composable
+fun <T> SingleSelectSearchableSpinnerDialog(
+    label: String,
+    items: List<Pair<String, T>>,
+    itemLabel: (Pair<String, T>) -> String,
+    selectedItem: T?,
+    onItemSelected: (Pair<String, T>?) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    var searchText by remember {
+        mutableStateOf(
+            items.find { it.second == selectedItem }?.let(itemLabel) ?: ""
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clickable { showDialog = true }
+    ) {
+        OutlinedTextField(
+            value = searchText,
+            onValueChange = {},
+            label = { Text(label) },
+            readOnly = true,
+            enabled = false,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            shape = MaterialTheme.shapes.medium,
+            trailingIcon = {
+                IconButton(onClick = { showDialog = true }) {
+                    Icon(painter = painterResource(Res.drawable.arrow_drop_down),
+                        modifier = Modifier.size(24.dp) // actual icon size
+,
+                                contentDescription = "Select")
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledTextColor = LocalContentColor.current.copy(alpha = 1f),
+                disabledLabelColor = LocalContentColor.current.copy(alpha = 1f),
+                disabledTrailingIconColor = LocalContentColor.current.copy(alpha = 1f),
+                disabledBorderColor = MaterialTheme.colorScheme.outline,
+                disabledContainerColor = Color.White
+            )
+        )
+    }
+
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                tonalElevation = 8.dp,
+                color = Color.White // 👈 Force white background
+
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    var searchQuery by remember { mutableStateOf("") }
+
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = { Text("Search $label") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val filteredItems = (if (searchQuery.isEmpty()) {
+                        items
+                    } else {
+                        items.filter { itemLabel(it).contains(searchQuery, ignoreCase = true) }
+                    }).sortedBy { itemLabel(it).trim().lowercase() }
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp)
+                    ) {
+                        items(filteredItems) { item ->
+                            TextButton(
+                                onClick = {
+                                    searchText = itemLabel(item)
+                                    onItemSelected(item)
+                                    showDialog = false
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = itemLabel(item),
+                                    textAlign = TextAlign.Left,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EtiologicalAgentScreenPreview() {
+//    val questionViewModel: EtiologicalAgentScreenViewModel
+//
+//    MaterialTheme {
+//        EtiologicalAgentScreen(
+//            questionViewModel,
+//            onSubmit = {},
+//            onBackClick = {}
+//        )
+//    }
+}

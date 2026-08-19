@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import buganddrug_multiplateform.composeapp.generated.resources.ExpandLess
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
@@ -137,11 +138,19 @@ fun ArtResistanceTreatmentScreen(onBackClick: () -> Unit = {}) {
 private fun ArtResistanceCard(entry: ArtResistanceEntry) {
     var expanded by remember { mutableStateOf(false) }
 
-    Card(
+    val (badgeBg, badgeText) = when (entry.drugClass.uppercase()) {
+        "NRTI" -> Pair(Color(0xFFF3E5F5), Color(0xFF800080))
+        "NNRTI" -> Pair(Color(0xFFE0F2FE), Color(0xFF0369A1))
+        "INSTI" -> Pair(Color(0xFFE0F2FE), Color(0xFF0D9488))
+        else -> Pair(Color(0xFFF1F5F9), Color(0xFF475569))
+    }
+
+    ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)    ) {
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -155,16 +164,36 @@ private fun ArtResistanceCard(entry: ArtResistanceEntry) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "${entry.drugClass} - ${entry.drug}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            color = badgeBg,
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Text(
+                                text = entry.drugClass,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = badgeText
+                                ),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                        Text(
+                            text = entry.drug,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1E293B)
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = entry.resistanceGene,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF800080)
+                        )
                     )
                 }
 
@@ -176,43 +205,47 @@ private fun ArtResistanceCard(entry: ArtResistanceEntry) {
                             Res.drawable.arrow_drop_down
                     ),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp) // actual icon size
-
+                    modifier = Modifier.size(24.dp),
+                    tint = Color(0xFF800080)
                 )
             }
 
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(top = 12.dp)) {
 
-                    Divider()
+                    HorizontalDivider(color = Color(0xFFE2E8F0))
                     Spacer(modifier = Modifier.height(12.dp))
 
                     DetailRow("Common Resistance Pattern", entry.resistancePattern)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     DetailRow("Recommended Treatment Option (WHO-based)", entry.recommendedTreatment)
                 }
             }
         }
     }
 }
+
 @Composable
 fun DetailRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
+            style = MaterialTheme.typography.labelLarge.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF800080)
+            )
         )
-        Text(
+        Spacer(modifier = Modifier.height(4.dp))
+        com.medical.buganddrug.util.ClickableDiseaseText(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.End,
-            modifier = Modifier.weight(2f)
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = Color(0xFF1E293B),
+                lineHeight = 22.sp
+            )
         )
     }
 }

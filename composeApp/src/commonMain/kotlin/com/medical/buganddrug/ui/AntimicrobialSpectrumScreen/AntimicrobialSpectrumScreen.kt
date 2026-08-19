@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.medical.buganddrug.data.model.AntimicrobialSpectrumData.BacteriaRow
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.GridLists
 import com.medical.buganddrug.ui.AntimicrobialSpectrumScreen.AntimicrobialSpectrumViewModel
 import com.medical.buganddrug.ui.QuickIDConsult.Q1.QuestionViewModel
 import com.medical.buganddrug.ui.QuickIDConsult.topBar
@@ -44,12 +45,12 @@ fun AntimicrobialSpectrumScreen(
     val verticalScroll = rememberScrollState()
     val horizontalScroll = rememberScrollState()
 
-    // Function to return color based on value
+    // Function to return color based on value (Enhanced contrast and accessible palette)
     fun colorForValue(value: Int): Color = when (value) {
-        3 -> Color(0xFF50c878) // Green
-        2 -> Color(0xFF03A9F4) // Yellow
-        1 -> Color(0xFFffd700) // Red
-        else -> Color(0xFFdc143c) // Gray
+        3 -> Color(0xFF10B981) // Emerald Green - Recommended
+        2 -> Color(0xFF0284C7) // Sky Blue - Effective
+        1 -> Color(0xFFF59E0B) // Amber - Variable
+        else -> Color(0xFFEF4444) // Crimson Red - Not effective
     }
 
     Scaffold(
@@ -76,45 +77,47 @@ fun AntimicrobialSpectrumScreen(
         ) {
 
             Column {
-                // Legend (2x2 matrix)
-                Column(
+                // Legend Card
+                ElevatedCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                        .background(Color.White, RoundedCornerShape(12.dp))
-                        .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
-                        .padding(12.dp)
+                        .padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
-                    Text(
-                        text = "Interpretation of Scores",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF800080)
-                        ),
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Interpretation of Scores",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF800080)
+                            ),
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                    // 2x2 Grid Layout
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(
+                        // 2x2 Grid Layout
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            LegendItem(color = Color(0xFFdc143c), label = "0 = Not effective")
-                            LegendItem(color = Color(0xFFffd700), label = "1 = May or may not be")
-                        }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                LegendItem(color = Color(0xFFEF4444), label = "0 = Not effective")
+                                LegendItem(color = Color(0xFFF59E0B), label = "1 = May or may not be")
+                            }
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            LegendItem(color = Color(0xFF03A9F4), label = "2 = Effective")
-                            LegendItem(color = Color(0xFF50c878), label = "3 = Recommended")
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                LegendItem(color = Color(0xFF0284C7), label = "2 = Effective")
+                                LegendItem(color = Color(0xFF10B981), label = "3 = Recommended")
+                            }
                         }
                     }
                 }
@@ -179,7 +182,7 @@ fun AntimicrobialSpectrumScreen(
                         "Oral Fosfomycin"
                     )
 // ✅ Row headers
-                    val rowHeaders = response!!. gridLists.map { it.label }
+                    val rowHeaders = response!!.gridLists.map{ it.Label }
 
                     // ✅ Table matrix
                     val data: List<List<Int?>> =
@@ -233,11 +236,11 @@ fun AntimicrobialSpectrumScreen(
 
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(
-                                        text = rowHeader,
-                                        textAlign = TextAlign.Center,
+                                    com.medical.buganddrug.util.ClickableDiseaseText(
+                                        text = rowHeader!!,
                                         style = MaterialTheme.typography.bodyMedium.copy(
                                             fontWeight = FontWeight.SemiBold,
+                                            textAlign = TextAlign.Center,
                                             color = if (isAllZeroRow)
                                                 Color(0xFF800080)   // 👈 Change color if all zero
                                             else
@@ -278,17 +281,16 @@ fun AntimicrobialSpectrumScreen(
                                         .border(0.5.dp, Color.White),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(
+                                    com.medical.buganddrug.util.ClickableDiseaseText(
                                         text = header
                                             .lowercase()
                                             .split(" ")
                                             .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } },
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontWeight = FontWeight.Bold,
                                             color = Color.White,
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        fontSize = 11.sp
+                                            fontSize = 11.sp
+                                        )
                                     )
                                 }
                             }
@@ -373,53 +375,53 @@ fun LegendItem(color: Color, label: String) {
     }
 }
 
-fun BacteriaRow.valueForColumn(column: String): Int? {
+fun GridLists.valueForColumn(column: String): Int? {
     return when (column) {
-        "penicillin" -> penicillinG
-        "cloxacillin" -> cloxacillin
-        "ampicillin" -> ampicillin
-        "amoxicillin" -> amoxicillin
-        "amoxicillin Clavulanate" -> amoxicillinClavulanate
-        "piperacillin Tazobactam" -> piperacillinTazobactam
-        "cephalexin" -> cephalexin
-        "cefazolin" -> cefazolin
-        "cefixime" -> cefixime
-        "cefuroxime" -> cefuroxime
-        "cefpodoxime" -> cefpodoxime
-        "cefotaxime" -> cefotaxime
-        "cefoperazone" -> cefoperazone
-        "ceftriaxone" -> ceftriaxone
-        "ceftazidime" -> ceftazidime
-        "cefepime" -> cefepime
-        "ceftaroline" -> ceftaroline
-        "cefiderocol" -> cefiderocol
-        "cefoperazone Sulbactam" -> cefoperazoneSulbactam
-        "ceftazidime Avibactam" -> ceftazidimeAvibactam
-        "ertapenem" -> ertapenem
-        "imipenem" -> imipenem
-        "meropenem" -> meropenem
-        "aztreonam" -> aztreonam
-        "amikacin" -> amikacin
+        "penicillin" -> Penicilling
+        "cloxacillin" -> Cloxacillin
+        "ampicillin" -> Ampicillin
+        "amoxicillin" -> Amoxicillin
+        "amoxicillin Clavulanate" -> Amoxicillinclavulanate
+        "piperacillin Tazobactam" -> Piperacillintazobactam
+        "cephalexin" -> Cephalexin1stgeneration
+        "cefazolin" -> Cefazolin1stgeneration
+        "cefixime" -> Cefixime2ndgeneration
+        "cefuroxime" -> Cefuroxime2ndgeneration
+        "cefpodoxime" -> Cefpodoxime3rdgeneration
+        "cefotaxime" -> Cefotaxime3rdgeneration
+        "cefoperazone" -> Cefoperazone3rdgeneration
+        "ceftriaxone" -> Ceftriaxone3rdgeneration
+        "ceftazidime" -> Ceftazidime3rdgeneration
+        "cefepime" -> Cefepime4thgeneration
+        "ceftaroline" -> Ceftaroline5thgeneration
+        "cefiderocol" -> Cefiderocol5thgeneration
+        "cefoperazone Sulbactam" -> Cefoperazonesulbactam
+        "ceftazidime Avibactam" -> CeftazidimeAvibactam
+        "ertapenem" -> Ertapenem
+        "imipenem" -> Imipenem
+        "meropenem" -> Meropenem
+        "aztreonam" -> Aztreonam
+        "amikacin" -> Amikacin
         "gentamicin" -> gentamicin
-        "ciprofloxacin" -> ciprofloxacin
-        "levofloxacin" -> levofloxacin
-        "moxifloxacin" -> moxifloxacin
-        "Trimethoprim Sulfamethoxazole" -> tmpSmx
-        "vancomycin" -> vancomycin
-        "daptomycin" -> daptomycin
-        "linezolid" -> linezolid
-        "clindamycin" -> clindamycin
-        "doxycycline" -> doxycycline
-        "minocycline" -> minocycline
-        "tigecycline" -> tigecycline
-        "colistin" -> colistin
-        "erythromycin" -> erythromycin
-        "azithromycin" -> azithromycin
-        "clarithromycin" -> clarithromycin
-        "metronidazole" -> metronidazole
-        "nitrofurantoin" -> nitrofurantoin
-        "Intravenous Fosfomycin" -> fosfomycinIV
-        "Oral Fosfomycin" -> fosfomycinPO
+        "ciprofloxacin" -> Ciprofloxacin
+        "levofloxacin" -> Levofloxacin
+        "moxifloxacin" -> Moxifloxacin
+        "Trimethoprim Sulfamethoxazole" -> TMPSMX
+        "vancomycin" -> Vancomycin
+        "daptomycin" -> Daptomycin
+        "linezolid" -> Linezolid
+        "clindamycin" -> Clindamycin
+        "doxycycline" -> Doxycycline
+        "minocycline" -> Minocycline
+        "tigecycline" -> Tigecycline
+        "colistin" -> Colistin
+        "erythromycin" -> Erythromycin
+        "azithromycin" -> Azithromycin
+        "clarithromycin" -> Clarithromycin
+        "metronidazole" -> Metronidazole
+        "nitrofurantoin" -> Nitrofurantoin
+        "Intravenous Fosfomycin" -> FosfomycinIV
+        "Oral Fosfomycin" -> FosfomycinPO
         else -> null
     }
 }

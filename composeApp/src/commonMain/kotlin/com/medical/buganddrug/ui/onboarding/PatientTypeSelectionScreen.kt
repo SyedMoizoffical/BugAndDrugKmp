@@ -41,7 +41,33 @@ import buganddrug_multiplateform.composeapp.generated.resources.menu_dots
 import buganddrug_multiplateform.composeapp.generated.resources.outpatient
 import buganddrug_multiplateform.composeapp.generated.resources.reportissue
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
+import com.medical.buganddrug.ui.onboarding.loginScreen.AuthViewModel
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import com.medical.buganddrug.util.ErrorAlertDialog
+import com.medical.buganddrug.util.LoadingOverlay
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import buganddrug_multiplateform.composeapp.generated.resources.search
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.DiseaseItem
+import com.medical.buganddrug.ui.FilterScreen.ClinicalSyndromeFilterScreen
+import com.medical.buganddrug.ui.FilterScreen.EtiologicalAgentFilterScreen
+import com.medical.buganddrug.ui.QuickIDConsult.Q5.QuestionSixFilterScreen
+import com.medical.buganddrug.ui.clinicalSyndrome.ClinicalSyndromeViewModel
+import com.medical.buganddrug.ui.EtiologicalAgentScreen.EtiologicalAgentScreenViewModel
+import com.medical.buganddrug.ui.QuickIDConsult.Q5.QuestionSixViewModel
+import org.koin.compose.koinInject
 
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -57,8 +83,18 @@ fun PatientTypeSelectionScreen(
     onBugReportClick: () -> Unit = {},
     onPrivacyPolicyClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
-    onBackClick: () -> Unit = {}
-) {
+    onBackClick: () -> Unit = {},
+    authViewModel: AuthViewModel,
+
+    ) {
+    val isLoading by authViewModel.loading.collectAsState()
+    val errorMessage by authViewModel.errorMessage.collectAsState()
+    val diseaseList by authViewModel.diseaseList.collectAsState()
+
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
+    var selectedDiseaseForDialog by remember { mutableStateOf<DiseaseItem?>(null) }
+
     var showDisclaimer by remember { mutableStateOf(false) }
     var selectedPatientType by remember { mutableStateOf<String?>(null) }
     var showError by remember { mutableStateOf(false) }
@@ -71,11 +107,9 @@ fun PatientTypeSelectionScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-//    LaunchedEffect(getDisclaimer) {
-//        if (getDisclaimer.isNullOrEmpty()) {
-//            showDisclaimer = true
-//        }
-//    }
+    LaunchedEffect(Unit) {
+        authViewModel.printExtractedDiseaseList()
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -89,7 +123,7 @@ fun PatientTypeSelectionScreen(
             ) {
                 DrawerHeaderElegant()
 
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 28.dp),
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
                     thickness = 1.dp
@@ -209,22 +243,153 @@ fun PatientTypeSelectionScreen(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Top,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .imePadding()
                         ) {
+                            // Search Bar (Placed on top of Logo Image)
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                placeholder = { Text("Search Disease, Organism, Antibiotic...", fontSize = 13.sp, color = Color(0xFF94A3B8)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.search),
+                                        contentDescription = "Search",
+                                        tint = Color(0xFF800080),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                },
+                                trailingIcon = {
+                                    if (searchQuery.isNotEmpty() || isSearchActive) {
+                                        IconButton(onClick = {
+                                            searchQuery = ""
+                                            isSearchActive = false
+                                        }) {
+                                            Text("✕", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B))
+                                        }
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onFocusChanged { if (it.isFocused) isSearchActive = true }
+                                    .padding(bottom = 12.dp),
+                                shape = RoundedCornerShape(18.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = Color.White,
+                                    unfocusedContainerColor = Color.White,
+                                    focusedBorderColor = Color(0xFF800080),
+                                    unfocusedBorderColor = Color(0xFFE2E8F0)
+                                ),
+                                singleLine = true
+                            )
+
+                            // Alphabetically Sorted Search Results Dropdown List
+                            val filteredDiseases = remember(searchQuery, diseaseList) {
+                                val baseList = if (searchQuery.isBlank()) {
+                                    diseaseList
+                                } else {
+                                    diseaseList.filter { it.name.contains(searchQuery, ignoreCase = true) }
+                                }
+                                baseList.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
+                            }
+
+                            if (isSearchActive || searchQuery.isNotBlank()) {
+                                ElevatedCard(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 280.dp)
+                                        .padding(bottom = 16.dp),
+                                    shape = RoundedCornerShape(18.dp),
+                                    elevation = CardDefaults.elevatedCardElevation(4.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                                ) {
+                                    if (filteredDiseases.isEmpty()) {
+                                        Text(
+                                            text = "No matching records found",
+                                            modifier = Modifier.padding(16.dp),
+                                            fontSize = 14.sp,
+                                            color = Color(0xFF64748B)
+                                        )
+                                    } else {
+                                        LazyColumn(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentPadding = PaddingValues(vertical = 4.dp)
+                                        ) {
+                                            items(
+                                                items = filteredDiseases,
+                                                key = { "${it.type}_${it.id}_${it.name}" }
+                                            ) { disease ->
+                                                Column {
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable {
+                                                                searchQuery = ""
+                                                                isSearchActive = false
+                                                                selectedDiseaseForDialog = disease
+                                                            }
+                                                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.SpaceBetween
+                                                    ) {
+                                                        Text(
+                                                            text = disease.name,
+                                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = Color(0xFF1E293B)
+                                                            ),
+                                                            modifier = Modifier.weight(1f)
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                        val tagBg = when (disease.type.lowercase()) {
+                                                            "disease" -> Color(0xFFF3E5F5)
+                                                            "organism", "organisum" -> Color(0xFFE0F2FE)
+                                                            "antibiotic" -> Color(0xFFDCFCE7)
+                                                            else -> Color(0xFFF1F5F9)
+                                                        }
+                                                        val tagColor = when (disease.type.lowercase()) {
+                                                            "disease" -> Color(0xFF800080)
+                                                            "organism", "organisum" -> Color(0xFF0369A1)
+                                                            "antibiotic" -> Color(0xFF15803D)
+                                                            else -> Color(0xFF475569)
+                                                        }
+                                                        Surface(
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            color = tagBg
+                                                        ) {
+                                                            Text(
+                                                                text = disease.type.uppercase(),
+                                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                                                fontSize = 11.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = tagColor
+                                                            )
+                                                        }
+                                                    }
+                                                    HorizontalDivider(color = Color(0xFFF1F5F9), modifier = Modifier.padding(horizontal = 16.dp))
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             TitleLogo(
                                 Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 24.dp),
+                                    .padding(bottom = 14.dp),
                                 small = false
                             )
 
                             Text(
                                 text = "Select Patient Type",
-                                style = MaterialTheme.typography.headlineSmall.copy(
+                                style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF800080) // Your purple
+                                    color = Color(0xFF800080)
                                 ),
-                                modifier = Modifier.padding(bottom = 24.dp)
+                                modifier = Modifier.padding(bottom = 16.dp)
                             )
 
                             Row(
@@ -236,11 +401,7 @@ fun PatientTypeSelectionScreen(
                                     title = "In Patients",
                                     isSelected = false,
                                     onClick = {
-//                                        if(resultString.isEmpty()){
-//                                            showError = true
-//                                        } else {
-                                            onInPatientTypeClick()
-                                       // }
+                                        onInPatientTypeClick()
                                     },
                                     modifier = Modifier.weight(1f)
                                 )
@@ -249,26 +410,22 @@ fun PatientTypeSelectionScreen(
                                     title = "Out Patients",
                                     isSelected = false,
                                     onClick = {
-//                                        if(resultString.isEmpty()){
-//                                            showError = true
-//                                        } else {
-                                            onOutPatientTypeClick()
-                                        //}
+                                        onOutPatientTypeClick()
                                     },
                                     modifier = Modifier.weight(1f)
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(40.dp))
+                            Spacer(modifier = Modifier.height(28.dp))
 
                             // Using your GradientButton
                             GradientButton(
                                 text = "View Patient Info",
-                                modifier = Modifier.fillMaxWidth().height(54.dp),
+                                modifier = Modifier.fillMaxWidth().height(52.dp),
                                 onClick = { onPatientInfoClick() }
                             )
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
 
                             // Grouped Survey Buttons Side-by-Side for a cleaner look
                             Row(
@@ -277,12 +434,12 @@ fun PatientTypeSelectionScreen(
                             ) {
                                 GradientButton(
                                     text = "Pre Survey",
-                                    modifier = Modifier.weight(1f).height(50.dp),
+                                    modifier = Modifier.weight(1f).height(48.dp),
                                     onClick = { onPreSurveyClick() }
                                 )
                                 GradientButton(
                                     text = "Post Survey",
-                                    modifier = Modifier.weight(1f).height(50.dp),
+                                    modifier = Modifier.weight(1f).height(48.dp),
                                     onClick = { onPostSurveyClick() }
                                 )
                             }
@@ -305,6 +462,88 @@ fun PatientTypeSelectionScreen(
                     onDismiss = { showError =false }
                 )
             }
+            if (isLoading) {
+                LoadingOverlay()
+            }
+            if (errorMessage != null) {
+                ErrorAlertDialog(
+                    errorMessage = errorMessage,
+                    onDismiss = { authViewModel.clearError() }
+                )
+            }
+
+            selectedDiseaseForDialog?.let { disease ->
+                var showContent by remember(disease) { mutableStateOf(true) }
+
+                LaunchedEffect(showContent) {
+                    if (!showContent) {
+                        kotlinx.coroutines.delay(220)
+                        selectedDiseaseForDialog = null
+                    }
+                }
+
+                val animateDismiss = {
+                    showContent = false
+                }
+
+                Dialog(
+                    onDismissRequest = animateDismiss,
+                    properties = DialogProperties(
+                        usePlatformDefaultWidth = false,
+                        decorFitsSystemWindows = false,
+                        dismissOnBackPress = true,
+                        dismissOnClickOutside = false
+                    )
+                ) {
+                    AnimatedVisibility(
+                        visible = showContent,
+                        enter = slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(durationMillis = 220)),
+                        exit = slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(durationMillis = 220))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.background)
+                        ) {
+                            when {
+                                disease.type.equals("disease", ignoreCase = true) -> {
+                                    val vm: ClinicalSyndromeViewModel = koinInject()
+                                    ClinicalSyndromeFilterScreen(
+                                        viewModel = vm,
+                                        onBackClick = animateDismiss,
+                                        diseaseId = disease.id,
+                                        diseaseName = disease.name
+                                    )
+                                }
+                                disease.type.equals("organism", ignoreCase = true) || disease.type.equals("organisum", ignoreCase = true) -> {
+                                    val vm: EtiologicalAgentScreenViewModel = koinInject()
+                                    EtiologicalAgentFilterScreen(
+                                        viewModel = vm,
+                                        onBackClick = animateDismiss,
+                                        organismId = disease.id,
+                                        organismName = disease.name
+                                    )
+                                }
+                                disease.type.equals("antibiotic", ignoreCase = true) -> {
+                                    val vm: QuestionSixViewModel = koinInject()
+                                    QuestionSixFilterScreen(
+                                        viewModel = vm,
+                                        onBackClick = animateDismiss,
+                                        antibioticId = disease.id,
+                                        antibioticName = disease.name
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
         }
     }
@@ -312,7 +551,7 @@ fun PatientTypeSelectionScreen(
 
 @Composable
 fun PatientTypeCard(
-    icon:Painter,
+    icon: Painter,
     title: String,
     isSelected: Boolean,
     onClick: () -> Unit,
@@ -321,9 +560,6 @@ fun PatientTypeCard(
     val backgroundColor by animateColorAsState(
         if (isSelected) Color(0xFF800080) else Color.White, label = "bg_color"
     )
-    val contentColor by animateColorAsState(
-        if (isSelected) Color.White else Color(0xFF800080), label = "content_color"
-    )
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.03f else 1f,
         animationSpec = spring(stiffness = Spring.StiffnessLow), label = "scale_anim"
@@ -331,34 +567,31 @@ fun PatientTypeCard(
 
     Card(
         modifier = modifier
-            .height(150.dp)
+            .height(140.dp)
             .scale(scale)
-            .shadow(
-                elevation = if (isSelected) 12.dp else 4.dp,
-                shape = RoundedCornerShape(24.dp),
-                spotColor = if (isSelected) Color(0xFF800080) else Color.Black.copy(alpha = 0.1f)
-            )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick
             ),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isSelected) 8.dp else 4.dp
+        ),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        // Add a very subtle border when unselected to make it look crisp against the white/lavender background
-        border = if (!isSelected) BorderStroke(1.dp, Color(0xFFE5E7EB)) else null
+        border = if (!isSelected) BorderStroke(1.dp, Color(0xFFE2E8F0)) else null
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(14.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Icon placed inside a soft circular background
             Box(
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(54.dp)
                     .background(
                         color = if (isSelected) Color.White.copy(alpha = 0.15f) else Color(0xFFF3E5F5),
                         shape = CircleShape
@@ -368,18 +601,19 @@ fun PatientTypeCard(
                 Icon(
                     painter = icon,
                     contentDescription = title,
-                    tint = Color.Unspecified, // keep original colors
-
-                    //  tint = contentColor,
-                    modifier = Modifier.size(28.dp)
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(30.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                ),
                 color = if (isSelected) Color.White else Color(0xFF1B2B5D)
             )
         }
@@ -397,21 +631,23 @@ fun TitleLogo(modifier: Modifier = Modifier, small: Boolean = false) {
             contentDescription = "App Logo",
             modifier = if (small)
                 Modifier
-                    .size(110.dp)
-                    .clip(RoundedCornerShape(32.dp))
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(24.dp))
             else
                 Modifier
-                    .size(180.dp) // Slightly scaled down to prevent crowding
-                    .clip(RoundedCornerShape(40.dp))
+                    .size(140.dp)
+                    .clip(RoundedCornerShape(32.dp))
         )
         Text(
             text = "AI/ML Clinical Decision Support",
             style = MaterialTheme.typography.bodyMedium.copy(
-                color = Color(0xFF4B5563),
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center
+                color = Color(0xFF64748B),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+                fontSize = 13.sp,
+                letterSpacing = 0.3.sp
             ),
-            modifier = Modifier.padding(top = 12.dp)
+            modifier = Modifier.padding(top = 10.dp)
         )
     }
 }
@@ -451,21 +687,26 @@ fun patientTopBar(
 
         navigationIcon = {
             Box(
-                modifier = Modifier
-                    .padding(start = 12.dp)
-                    .size(width = 40.dp, height = 40.dp)
-                    .clip(RoundedCornerShape(12.dp)) // card radius
-                    .background(Color.White)
-                    .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
-                    .clickable { onMenuClick() },   // click here instead of IconButton
+                modifier = Modifier.fillMaxHeight(),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    painterResource(Res.drawable.menu_dots),
-                    contentDescription = "Menu",
-                    tint = Color(0xFF0F172A),
-                    modifier = Modifier.size(20.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .padding(start = 12.dp)
+                        .size(width = 40.dp, height = 40.dp)
+                        .clip(RoundedCornerShape(12.dp)) // card radius
+                        .background(Color.White)
+                        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
+                        .clickable { onMenuClick() },   // click here instead of IconButton
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painterResource(Res.drawable.menu_dots),
+                        contentDescription = "Menu",
+                        tint = Color(0xFF0F172A),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         },
         // Optional right-side back icon if needed later

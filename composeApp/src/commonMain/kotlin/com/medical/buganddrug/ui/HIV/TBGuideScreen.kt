@@ -576,15 +576,15 @@ fun TuberculosisDiagnosisScreen(
 fun ModernCard(
     content: @Composable () -> Unit
 ) {
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
-            ) { /* Optional: add onToggle or remove clickable if not needed */ },
+            ) { },
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         content()
@@ -607,49 +607,73 @@ fun TableRow(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF1E293B)
+            )
         )
-        Text(
+        com.medical.buganddrug.util.ClickableDiseaseText(
             text = tests,
             modifier = Modifier
                 .weight(2f)
                 .padding(horizontal = 8.dp),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = Color(0xFF334155),
+                lineHeight = 22.sp
+            )
         )
     }
 }
+
 @Composable
 fun TableRow3(feature: String, rif: String, ultra: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         Text(
             text = feature,
             modifier = Modifier.weight(1f),
-            fontWeight = FontWeight.Medium
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF1E293B)
+            )
         )
-        Text(
+        com.medical.buganddrug.util.ClickableDiseaseText(
             text = rif,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = Color(0xFF334155),
+                lineHeight = 20.sp
+            )
         )
-        Text(
+        com.medical.buganddrug.util.ClickableDiseaseText(
             text = ultra,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = Color(0xFF334155),
+                lineHeight = 20.sp
+            )
         )
     }
 }
+
 @Composable
 fun BulletPointItem(text: String) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("•", style = MaterialTheme.typography.bodyMedium)
-        Text(text, style = MaterialTheme.typography.bodyMedium)
+        Text("•", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold, color = Color(0xFF800080)))
+        com.medical.buganddrug.util.ClickableDiseaseText(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = Color(0xFF1E293B),
+                lineHeight = 22.sp
+            )
+        )
     }
 }
 

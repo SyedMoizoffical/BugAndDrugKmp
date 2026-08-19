@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medical.buganddrug.data.local.AntibioticGeneListEntity
 import com.medical.buganddrug.data.model.QoestionsModel.Q4Model.GetPrecautionFinderList
 import com.medical.buganddrug.data.model.QoestionsModel.Q8Model.GetAntibioticGeneListResponse
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
@@ -25,7 +26,7 @@ class QuestionEightViewModel (
     val loading: StateFlow<Boolean> = _loading
 
 
-    var getPrecautionFinderList by mutableStateOf<GetAntibioticGeneListResponse?>(null) // ✅ since repo returns Result<Unit>
+    var getPrecautionFinderList by mutableStateOf<AntibioticGeneListEntity?>(null) // ✅ since repo returns Result<Unit>
         private set
 
 
@@ -42,15 +43,15 @@ class QuestionEightViewModel (
             println(sharedPrefs.getPatientData())
 
 
-            val result = repository.getQ8Data()
+            val result = repository.getLocalAntibioticGeneList()
 
-            result.onSuccess {
+            if (result != null) {
                 _loading.value = false
-                getPrecautionFinderList = it // ✅ Unit
+                getPrecautionFinderList = result // ✅ Unit
                 _errorMessage.value = null
-            }.onFailure { throwable ->
+            }else {
                 _loading.value = false
-                _errorMessage.value = throwable.message
+                _errorMessage.value = "No data Found"
             }
 
 

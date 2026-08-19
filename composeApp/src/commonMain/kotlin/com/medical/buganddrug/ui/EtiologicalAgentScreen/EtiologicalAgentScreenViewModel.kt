@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.SyndromeIdentificationData
 import com.medical.buganddrug.data.model.QoestionsModel.Q2Model.QuestionTwoResponseModel
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
 import com.medical.buganddrug.data.repository.QuestionsRepository
@@ -22,7 +23,7 @@ class EtiologicalAgentScreenViewModel (
     val loading: StateFlow<Boolean> = _loading
 
 
-    var getEtiologicalAgent by mutableStateOf<QuestionTwoResponseModel?>(null) // ✅ since repo returns Result<Unit>
+    var getEtiologicalAgent by mutableStateOf<SyndromeIdentificationData?>(null) // ✅ since repo returns Result<Unit>
         private set
 
 
@@ -38,15 +39,15 @@ class EtiologicalAgentScreenViewModel (
 
 
 
-            val result = repository.getEtiologicalAgent()
+            val result = repository.getLocalSyndromeIdentificationData()
 
-            result.onSuccess {
+            if (result != null){
                 _loading.value = false
-                getEtiologicalAgent = it // ✅ Unit
+                getEtiologicalAgent = result // ✅ Unit
                 _errorMessage.value = null
-            }.onFailure { throwable ->
+            }else {
                 _loading.value = false
-                _errorMessage.value = throwable.message
+                _errorMessage.value = "no data found"
             }
 
 

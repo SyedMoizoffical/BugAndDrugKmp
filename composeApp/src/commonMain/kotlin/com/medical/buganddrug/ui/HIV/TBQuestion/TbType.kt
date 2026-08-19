@@ -241,7 +241,8 @@ fun TbDetailCard(data: TbType) {
                 Icon(
                     painter = painterResource(Res.drawable.first_aid_kit),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(48.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(

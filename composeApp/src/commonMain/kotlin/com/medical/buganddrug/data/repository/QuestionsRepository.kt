@@ -18,10 +18,13 @@ import com.medical.buganddrug.data.model.patientinfoModel.Data
 import com.medical.buganddrug.data.model.postExosureProplaxisModel.ExposureProPhylaxisModel
 import com.medical.buganddrug.data.remote.ApiService
 import com.medical.buganddrug.ui.onboarding.loginScreen.SignUpResponseDataModel
+import com.medical.buganddrug.data.local.*
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.*
 
 class QuestionsRepository (
 
-    private val api: ApiService
+    private val api: ApiService,
+    private val localDao: LocalDataDao
 ) {
     suspend fun getUser(): Result<Data?> {
         return try {
@@ -103,6 +106,7 @@ class QuestionsRepository (
     //Question Four
     suspend fun getQ4Data(): Result<GetPrecautionFinderList?> {
         return try {
+
             val response = api.getPrecautionFinderList()
             if (response.statusCode == 200) {
                 Result.success(response.data)
@@ -272,6 +276,219 @@ suspend fun checkEmailExists(email: String): Result<ApiResponse<SignUpResponseDa
             Result.failure(e)
         }
     }
+    //Question Four
+    suspend fun getAllLocalData(): Result<LocalDataModel?> {
+        return try {
+            val response = api.getAllDataForLocal()
+            if (response.statusCode == 200) {
+                val localData = response.data
+                if (localData != null) {
+                    localDao.insertLovs(
+                        LovsEntity(
+                            diseases = localData.lovs!!.diseases,
+                            immunoReson = localData.lovs.immunoReson,
+                            indwellingDevices = localData.lovs.indwellingDevices,
+                            seasonalities = localData.lovs.seasonalities,
+                            sign = localData.lovs.sign,
+                            symptoms = localData.lovs.symptoms
+                        )
+                    )
+                    localDao.insertSyndromeIdentificationDataQ2(
+                        SyndromeIdentificationDataQ2Entity(
+                            disease = localData.syndromeIdentificationDataQ2!!.disease!!,
+                            diseaseIdenticifationlists = localData.syndromeIdentificationDataQ2!!.diseaseIdenticifationlists!!,
+                            diseaseSignlist = localData.syndromeIdentificationDataQ2.diseaseSignlist!!,
+                            etilogicalAgents = localData.syndromeIdentificationDataQ2.etilogicalAgents!!,
+                            symptom = localData.syndromeIdentificationDataQ2.symptom!!,
+                            syndromeTests = localData.syndromeIdentificationDataQ2.syndromeTests!!,
+                            syndromes = localData.syndromeIdentificationDataQ2.syndromes!!
+                        )
+                    )
+                    localDao.insertSyndromeIdentificationData(
+                        SyndromeIdentificationDataEntity(
+                            disease = localData.syndromeIdentificationData!!.disease!!,
+                            diseaseIdenticifationlists = localData.syndromeIdentificationData.diseaseIdenticifationlists!!,
+                            diseaseSignlist = localData.syndromeIdentificationData.diseaseSignlist!!,
+                            etilogicalAgents = localData.syndromeIdentificationData.etilogicalAgents!!,
+                            symptom = localData.syndromeIdentificationData.symptom!!,
+                            syndromeTests = localData.syndromeIdentificationData.syndromeTests!!,
+                            syndromes = localData.syndromeIdentificationData.syndromes!!
+                        )
+                    )
+                    localDao.insertIvToPOs(
+                        IvToPOsEntity(
+                            iVtoPOs = localData.ivToPOs!!.iVtoPOs!!,
+                            url = localData.ivToPOs.url!!
+                        )
+                    )
+                    localDao.insertPrecautionFinderList(
+                        PrecautionFinderListEntity(
+                            isolations = localData.precautionFinderList!!.isolations!!
+                        )
+                    )
+                    localDao.insertCreatinineClearance(
+                        CreatinineClearanceEntity(
+                            antibioticDoses = localData.creatinineClearance!!.antibioticDoses!!,
+                            renalFunctionCategories = localData.creatinineClearance.renalFunctionCategories!!
+                        )
+                    )
+                    localDao.insertAntibioticGeneList(
+                        AntibioticGeneListEntity(
+                            antibioticGeneListDtos = localData.antibioticGeneList!!.antibioticGeneListDtos!!
+                        )
+                    )
+                    localDao.insertExposureProPhylaxisList(
+                        ExposureProPhylaxisListEntity(
+                            exposureProPhylaxisList = localData.exposureProPhylaxisList!!.exposureProPhylaxisList!!
+                        )
+                    )
+                    localDao.insertBacteriaSusceptibilityList(
+                        BacteriaSusceptibilityListEntity(
+                            gridLists = localData.bacteriaSusceptibilityList!!.gridLists!!
+                        )
+                    )
+                    localDao.insertHivArtCenterList(
+                        HivArtCenterListEntity(
+                            hivArtCenters = localData.hivArtCenterList!!.hivArtCenters!!
+                        )
+                    )
+                    localDao.insertCultureTherapyGuideList(
+                        CultureTherapyGuideListEntity(
+                            cultureTherapyGuidelistDtos = localData.cultureTherapyGuideList!!.cultureTherapyGuidelistDtos!!
+                        )
+                    )
+                    localData.qSofaScoringPossibilities?.let { list ->
+                        localDao.insertQSofaScoringPossibilities(
+                            QSofaScoringPossibilitiesEntity(
+                                qSofaScoringPossibilities = list
+                            )
+                        )
+                    }
+                    localData.news2ScoringPossibilities?.let { list ->
+                        localDao.insertNews2ScoringPossibilities(
+                            News2ScoringPossibilitiesEntity(
+                                news2ScoringPossibilities = list
+                            )
+                        )
+                    }
+                }
+                Result.success(response.data)
+            } else {
+                Result.failure(Exception(response.statusMessage))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getLocalLovs(): Lovs? = localDao.getLovs()?.let {
+        Lovs(
+            diseases = it.diseases,
+            immunoReson = it.immunoReson,
+            indwellingDevices = it.indwellingDevices,
+            seasonalities = it.seasonalities,
+            sign = it.sign,
+            symptoms = it.symptoms
+        )
+    }
+
+    suspend fun getLocalSyndromeIdentificationDataQ2(): SyndromeIdentificationDataQ2? = localDao.getSyndromeIdentificationDataQ2()?.let {
+        SyndromeIdentificationDataQ2(
+            disease = it.disease,
+            diseaseIdenticifationlists = it.diseaseIdenticifationlists,
+            diseaseSignlist = it.diseaseSignlist,
+            etilogicalAgents = it.etilogicalAgents,
+            symptom = it.symptom,
+            syndromeTests = it.syndromeTests,
+            syndromes = it.syndromes
+        )
+    }
+
+    suspend fun getLocalSyndromeIdentificationData(): SyndromeIdentificationData? = localDao.getSyndromeIdentificationData()?.let {
+        SyndromeIdentificationData(
+            disease = it.disease,
+            diseaseIdenticifationlists = it.diseaseIdenticifationlists,
+            diseaseSignlist = it.diseaseSignlist,
+            etilogicalAgents = it.etilogicalAgents,
+            symptom = it.symptom,
+            syndromeTests = it.syndromeTests,
+            syndromes = it.syndromes
+        )
+    }
+
+    suspend fun getLocalIvToPOs(): IvToPOs? = localDao.getIvToPOs()?.let {
+        IvToPOs(
+            iVtoPOs = it.iVtoPOs,
+            url = it.url
+        )
+    }
+
+    suspend fun getLocalPrecautionFinderList(): GetPrecautionFinderList? = localDao.getPrecautionFinderList()?.let {
+        GetPrecautionFinderList(
+            isolations = it.isolations
+        )
+    }
+
+    suspend fun getLocalCreatinineClearance(): CreatinineClearance? = localDao.getCreatinineClearance()?.let {
+        CreatinineClearance(
+            antibioticDoses = it.antibioticDoses,
+            renalFunctionCategories = it.renalFunctionCategories
+        )
+    }
+
+    suspend fun getLocalAntibioticGeneList(): AntibioticGeneListEntity? = localDao.getAntibioticGeneList()?.let {
+        AntibioticGeneListEntity(
+            antibioticGeneListDtos = it.antibioticGeneListDtos
+        )
+    }
+
+    suspend fun getLocalExposureProPhylaxisList(): ExposureProPhylaxisList? = localDao.getExposureProPhylaxisList()?.let {
+        ExposureProPhylaxisList(
+            exposureProPhylaxisList = it.exposureProPhylaxisList
+        )
+    }
+
+    suspend fun getLocalBacteriaSusceptibilityList(): BacteriaSusceptibilityList? = localDao.getBacteriaSusceptibilityList()?.let {
+        BacteriaSusceptibilityList(
+            gridLists = it.gridLists
+        )
+    }
+
+    suspend fun getLocalHivArtCenterList(): HivArtCenterList? = localDao.getHivArtCenterList()?.let {
+        HivArtCenterList(
+            hivArtCenters = it.hivArtCenters
+        )
+    }
+
+    suspend fun hasLocalData(): Boolean = localDao.getLovs() != null
+
+    suspend fun getLocalCultureTherapyGuideList(): CultureTherapyGuideList? = localDao.getCultureTherapyGuideList()?.let {
+        CultureTherapyGuideList(
+            cultureTherapyGuidelistDtos = it.cultureTherapyGuidelistDtos
+        )
+    }
+
+    suspend fun getLocalQSofaScoringPossibilities(): List<QSofaScoringPossibility>? = localDao.getQSofaScoringPossibilities()?.qSofaScoringPossibilities
+
+    suspend fun getLocalNews2ScoringPossibilities(): List<News2ScoringPossibility>? = localDao.getNews2ScoringPossibilities()?.news2ScoringPossibilities
+
+    /**
+     * Get extracted list of DiseaseItem (name, id, type) from local database.
+     * Fallback to default list if local database is empty.
+     */
+    suspend fun getDiseaseListFromLocalDatabase(): List<com.medical.buganddrug.data.model.LocalStorageDatamodel.DiseaseItem> {
+        val lovs = getLocalLovs()
+        val syndromeData = getLocalSyndromeIdentificationData()
+        val syndromeDataQ2 = getLocalSyndromeIdentificationDataQ2()
+        val creatinineClearance = getLocalCreatinineClearance()
+        return com.medical.buganddrug.util.DiseaseExtractor.getCombinedDiseaseList(
+            lovs = lovs,
+            syndromeData = syndromeData,
+            syndromeDataQ2 = syndromeDataQ2,
+            creatinineClearance = creatinineClearance
+        )
+    }
+
     suspend fun postBugReport(
         description: String,
         email: String,
@@ -296,4 +513,5 @@ suspend fun checkEmailExists(email: String): Result<ApiResponse<SignUpResponseDa
         }
     }
 }
+
 

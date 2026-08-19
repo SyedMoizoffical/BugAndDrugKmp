@@ -332,10 +332,7 @@ Abstain from sexual activity for 7 days after treatment and until asymptomatic."
 private fun STICard(entry: STIEntry) {
     var expanded by remember { mutableStateOf(false) }
 
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    val tonalColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(
@@ -343,7 +340,7 @@ private fun STICard(entry: STIEntry) {
                 indication = null
             ) { expanded = !expanded  },
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(8.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     )  {
         Column(
@@ -362,11 +359,11 @@ private fun STICard(entry: STIEntry) {
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Medium,
-                        color = md_theme_light_shadow
-                    )                )
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF1B2B5D)
+                    )
+                )
 
                 Icon(
                      painter = painterResource(Res.drawable.arrow_drop_down),
@@ -387,21 +384,22 @@ private fun STICard(entry: STIEntry) {
                     modifier = Modifier
                         .padding(top = 12.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(tonalColor)
-                        .padding(12.dp)
+                        .background(Color(0xFFF8FAFC))
+                        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
+                        .padding(14.dp)
                 ) {
                     DetailRow("Common Agents", entry.commonAgents)
-                    Divider()
+                    HorizontalDivider(color = Color(0xFFE2E8F0))
                     DetailRow("Signs & Symptoms", entry.signsSymptoms)
-                    Divider()
+                    HorizontalDivider(color = Color(0xFFE2E8F0))
                     DetailRow("Diagnostics", entry.diagnostics)
-                    Divider()
+                    HorizontalDivider(color = Color(0xFFE2E8F0))
                     DetailRow("Differential Diagnosis", entry.differential)
-                    Divider()
+                    HorizontalDivider(color = Color(0xFFE2E8F0))
                     DetailRow("Treatment (Pakistan)", entry.treatmentPakistan)
-                    Divider()
+                    HorizontalDivider(color = Color(0xFFE2E8F0))
                     DetailRow("Partner Management", entry.partnerManagement)
-                    Divider()
+                    HorizontalDivider(color = Color(0xFFE2E8F0))
                     DetailRow("Monitoring & Follow-up", entry.monitoringFollowUp)
                 }
             }
@@ -419,15 +417,17 @@ private fun DetailRow(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Medium
+            color = Color(0xFF800080),
+            fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
+        Spacer(modifier = Modifier.height(3.dp))
+        com.medical.buganddrug.util.ClickableDiseaseText(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Start
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = Color(0xFF1E293B),
+                textAlign = TextAlign.Start,
+                lineHeight = 22.sp
+            )
         )
     }
 }

@@ -21,6 +21,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -97,9 +99,18 @@ fun QuestionThreeScreen(
 
     // Data for Part 3 dropdown
     val conditions = ivToPOs
-        .map { it.diseaseId to it.diseaseName }
+        .mapNotNull { item ->
+            val id = item.diseaseId
+            val name = item.diseaseName
+
+            if (id != null && name != null) {
+                id to name
+            } else {
+                null
+            }
+        }
         .distinctBy { it.first }
-        .map { it.second to it.first }
+        .map { it.second to it.first }   // List<Pair<String, Int>>
 
     // Data for Part 3 table
     data class AntimicrobialOption(
@@ -218,7 +229,7 @@ fun QuestionThreeScreen(
                             .distinct()
                         SingleSelectSearchableSpinnerDialog(
                             label = "Select Antimicrobial",
-                            items = antibioticList.map { it to it },
+                            items = antibioticList.map { it!! to it },
                             itemLabel = { it.first },
                             selectedItem = antimicrobialName,
                             onItemSelected = { selected ->
@@ -548,10 +559,11 @@ fun QuestionThreeScreen(
                         ) {
                             Icon(
                                 painter = painterResource(Res.drawable.reportissue),
-
-                                contentDescription = "Report Icon",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                modifier = Modifier.size(48.dp)
                             )
+
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Antimicrobial Report",
@@ -562,32 +574,225 @@ fun QuestionThreeScreen(
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
-
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(500.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outline,
+                                    RoundedCornerShape(8.dp)
+                                )
                         ) {
-//
-//                            AndroidView(
-//                                factory = { webView },
-//                                modifier = Modifier.fillMaxSize(),
-//
-//                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState())
+                                    .padding(16.dp)
+                            ) {
 
-                            if (pdfLoading) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)),
-                                    contentAlignment = Alignment.Center
+                                Text(
+                                    text = "General Criteria for IV to PO Switch",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+
+                                Text(
+                                    text = "Ensure all criteria are met unless otherwise approved by an Infectious Diseases specialist.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
+                                )
+
+                                // Clinical Stability
+                                ChecklistSection(
+                                    title = "Clinical Stability",
+                                    items = listOf(
+                                        "Afebrile or improving fever curve",
+                                        "Hemodynamically stable (no vasopressors)",
+                                        "Improving WBC / infection markers",
+                                        "Improvement in infection symptoms and signs"
+                                    )
+                                )
+
+                                // GI Function
+                                ChecklistSection(
+                                    title = "GI Function",
+                                    items = listOf(
+                                        "Tolerating oral intake",
+                                        "No vomiting, ileus, or malabsorption",
+                                        "No concerns about absorption (severe mucositis, severe GI bleed, poor GI perfusion)"
+                                    )
+                                )
+
+                                // Oral Option Available
+                                ChecklistSection(
+                                    title = "Oral Option Available",
+                                    items = listOf(
+                                        "Pathogen susceptible to oral drug",
+                                        "Oral drug has good bioavailability & tissue penetration",
+                                        "Dose adjusted for renal/hepatic function"
+                                    )
+                                )
+
+                                // Source Control
+                                ChecklistSection(
+                                    title = "Source Control",
+                                    items = listOf(
+                                        "Abscess drained / source controlled",
+                                        "Indwelling devices managed/removed if possible"
+                                    )
+                                )
+
+                                // Special Populations
+                                ChecklistSection(
+                                    title = "Special Populations",
+                                    items = listOf(
+                                        "No CNS infection, endocarditis, or deep prosthetic infection needing prolonged IV therapy",
+                                        "If immunocompromised, switch after ID consultation"
+                                    )
+                                )
+
+                                // Patient Factors
+                                ChecklistSection(
+                                    title = "Patient Factors",
+                                    items = listOf(
+                                        "Able to adhere to oral regimen",
+                                        "No major drug interactions or contraindications",
+                                        "Oral drug available & affordable"
+                                    )
+                                )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                // Caution Section
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.errorContainer
+                                    )
                                 ) {
-                                    CircularProgressIndicator()
+                                    Column(
+                                        modifier = Modifier.padding(16.dp)
+                                    ) {
+                                        Text(
+                                            text = "⚠ Caution: Avoid Early IV → PO Switch",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onErrorContainer
+                                        )
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        listOf(
+                                            "Meningitis or other CNS infections",
+                                            "Endocarditis",
+                                            "Deep-seated abscess without drainage",
+                                            "Prosthetic joint or prosthetic valve infections",
+                                            "Severe sepsis or septic shock (until fully stabilized)",
+                                            "Neutropenic sepsis or severe immunosuppression (switch only after ID consultation)"
+                                        ).forEach { item ->
+                                            Row(
+                                                modifier = Modifier.padding(vertical = 4.dp),
+                                                verticalAlignment = Alignment.Top
+                                            ) {
+                                                Text(
+                                                    text = "•",
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                                )
+
+                                                Spacer(modifier = Modifier.width(8.dp))
+
+                                                Text(
+                                                    text = item,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
+
+                                Spacer(modifier = Modifier.height(20.dp))
+
+                                // High Bioavailability
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(16.dp)
+                                    ) {
+                                        Text(
+                                            text = "Oral Agents with High Bioavailability",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+
+                                        Spacer(modifier = Modifier.height(6.dp))
+
+                                        Text(
+                                            text = "These agents achieve nearly the same serum concentrations as IV when given orally, making them ideal for early switch.",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+
+                                        Spacer(modifier = Modifier.height(12.dp))
+
+                                        val agents = listOf(
+                                            "Ciprofloxacin",
+                                            "Clindamycin",
+                                            "Fluconazole",
+                                            "Levofloxacin",
+                                            "Linezolid",
+                                            "Metronidazole",
+                                            "TMP-SMX",
+                                            "Voriconazole"
+                                        )
+
+                                        agents.forEach { agent ->
+                                            Row(
+                                                modifier = Modifier.padding(vertical = 4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.CheckCircle,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(18.dp),
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+
+                                                Spacer(modifier = Modifier.width(8.dp))
+
+                                                Text(
+                                                    text = agent,
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text(
+                                    text = "Checklist for IV to PO Switch",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
                         }
+
+
+
                     }
                     // Submit Button for Part 3
                     Button(
@@ -650,9 +855,9 @@ fun QuestionThreeScreen(
                                 ) {
                                     Icon(
                                         painter = painterResource(Res.drawable.first_aid_kit),
-
-                                        contentDescription = "Table Icon",
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        modifier = Modifier.size(48.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
@@ -747,6 +952,59 @@ fun QuestionThreeScreen(
                     errorMessage = errorMessage,
                     onDismiss = { viewModel.clearError() }
                 )
+            }
+        }
+    }
+}
+@Composable
+private fun ChecklistSection(
+    title: String,
+    items: List<String>
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            items.forEach { item ->
+                Row(
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = item,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
     }

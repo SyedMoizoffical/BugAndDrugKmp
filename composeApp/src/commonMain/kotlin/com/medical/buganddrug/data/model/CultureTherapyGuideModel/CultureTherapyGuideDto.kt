@@ -9,11 +9,11 @@ data class CultureTherapyGuideModel(
 
 @Serializable
 data class CultureTherapyGuideDto(
-    val id: Int,
-    val sample: String,
-    val diagnosis: String,
-    val organism: String,
-    val antibiotic: String,
-    val duration: Int,
-    val notes: String
+    val antibiotic: String? = "",
+    val diagnosis: String? = "",
+    val duration: Int? = 0,
+    val id: Int? = 0,
+    val notes: String? = "",
+    val organism: String? = "",
+    val sample: String? = ""
 )

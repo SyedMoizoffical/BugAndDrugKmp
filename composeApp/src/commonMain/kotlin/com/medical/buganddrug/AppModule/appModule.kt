@@ -35,7 +35,7 @@ val appModule = module {
 
     // Repository
     single {
-        QuestionsRepository(get())
+        QuestionsRepository(get(), get())
     }
     // Repository
     single {

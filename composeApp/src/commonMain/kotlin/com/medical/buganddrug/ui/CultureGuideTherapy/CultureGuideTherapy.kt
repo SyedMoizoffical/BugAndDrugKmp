@@ -1,5 +1,6 @@
 package com.medical.buganddrug.ui.CultureGuideTherapy
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -146,7 +147,7 @@ fun CultureGuideTherapyScreen(
 
                         SingleSelectSearchableSpinnerDialog(
                             label = "Select Specimen",
-                            items = specimenList.map { it to it },
+                            items = specimenList.map { it!! to it },
                             itemLabel = { it.first },
                             selectedItem = selectedSpecimen,
                             onItemSelected = {
@@ -175,7 +176,7 @@ fun CultureGuideTherapyScreen(
                     item {
                             SingleSelectSearchableSpinnerDialog(
                                 label = "Select Infection",
-                                items = infectionList.map { it to it },
+                                items = infectionList.map { it!! to it },
                                 itemLabel = { it.first },
                                 selectedItem = selectedInfection,
                                 onItemSelected = {
@@ -204,7 +205,7 @@ fun CultureGuideTherapyScreen(
                     item {
                             SingleSelectSearchableSpinnerDialog(
                                 label = "Select Organism",
-                                items = organismList.map { it to it },
+                                items = organismList.map { it!! to it },
                                 itemLabel = { it.first },
                                 selectedItem = selectedOrganism,
                                 onItemSelected = {
@@ -268,7 +269,7 @@ fun CultureGuideTherapyScreen(
                                 val selectedSensitive = antibioticList
                                     .filter { selectedValues[it.antibiotic] == "S" }
                                     .sortedBy { it.duration }
-                                    .map { SelectedAntibiotic(it.antibiotic, "S") }
+                                    .map { SelectedAntibiotic(it.antibiotic!!, "S") }
 
                                 finalResults = selectedSensitive
                                 onSubmit()
@@ -307,63 +308,57 @@ fun AntibioticCard(
     selectedValues: Map<String, String>,
     onSelect: (String, String) -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(8.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(
-            Modifier
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color.White, Color(0xFFF5F9FF))
-                    )
-                )
-                .padding(16.dp)
+            Modifier.padding(16.dp)
         ) {
-
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-                Column {
-                    Text(
-                        record.antibiotic,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF800080)
-                        )
+                Text(
+                    record.antibiotic ?: "",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF800080)
                     )
-
-//                    if (record.notes.isNotEmpty()) {
-//                        Text(
-//                            record.notes,
-//                            style = MaterialTheme.typography.bodySmall,
-//                            color = Color(0xFF6B7A8E)
-//                        )
-//                    }
-                }
-
+                )
             }
 
             Spacer(Modifier.height(12.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(28.dp)) {
-                listOf("S", "R").forEach { option ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable {
-                            onSelect(record.antibiotic, option)
-                        }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                listOf("S" to "S (Sensitive)", "R" to "R (Resistant)").forEach { (option, labelText) ->
+                    val isSelected = selectedValues[record.antibiotic] == option
+                    val activeBg = if (option == "S") Color(0xFFDCFCE7) else Color(0xFFFFE4E6)
+                    val activeContent = if (option == "S") Color(0xFF166534) else Color(0xFFB91C1C)
+
+                    Surface(
+                        onClick = { onSelect(record.antibiotic!!, option) },
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (isSelected) activeBg else Color(0xFFF1F5F9),
+                        border = BorderStroke(1.dp, if (isSelected) activeContent.copy(alpha = 0.5f) else Color(0xFFE2E8F0)),
+                        modifier = Modifier.height(38.dp)
                     ) {
-                        RadioButton(
-                            selected = selectedValues[record.antibiotic] == option,
-                            onClick = { onSelect(record.antibiotic, option) }
-                        )
-                        Text(option)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        ) {
+                            Text(
+                                text = labelText,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (isSelected) activeContent else Color(0xFF64748B)
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -464,9 +459,9 @@ fun SelectedAntibioticTable(
                                 .background(bgColor)
                                 .padding(vertical = 10.dp)
                         ) {
-                            RowCell(record.antibiotic, 0.35f)
+                            RowCell(record.antibiotic!!, 0.35f)
                             RowCell(serialNo.toString(), 0.2f)
-                            RowCell(if (record.notes.isEmpty()) "-" else record.notes, 0.4f)
+                            RowCell(if (record.notes!!.isEmpty()) "-" else record.notes!!, 0.4f)
                         }
                     }
 
@@ -496,7 +491,7 @@ fun RowScope.HeaderCell(text: String, weight: Float) {
 
 @Composable
 fun RowScope.RowCell(text: String, weight: Float) {
-    Text(
+    com.medical.buganddrug.util.ClickableDiseaseText(
         text = text,
         modifier = Modifier
             .weight(weight)

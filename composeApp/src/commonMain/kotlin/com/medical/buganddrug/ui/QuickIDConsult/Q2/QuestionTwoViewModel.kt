@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.SyndromeIdentificationDataQ2
 import com.medical.buganddrug.data.model.QoestionsModel.Q2Model.QuestionTwoResponseModel
 import com.medical.buganddrug.data.model.patientinfoModel.Data
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
@@ -33,7 +34,7 @@ class QuestionTwoViewModel(
     var patientInfoResponse by mutableStateOf<Unit?>(null) // ✅ since repo returns Result<Unit>
         private set
 
-    var getSyndromeIdentificationData by mutableStateOf<QuestionTwoResponseModel?>(null) // ✅ since repo returns Result<Unit>
+    var getSyndromeIdentificationData by mutableStateOf<SyndromeIdentificationDataQ2?>(null) // ✅ since repo returns Result<Unit>
         private set
 
 
@@ -43,21 +44,6 @@ class QuestionTwoViewModel(
     private val _indWindingData = MutableStateFlow<String?>(null)
     val indWindingData: StateFlow<String?> = _indWindingData
 
-    fun fetchUser() {
-        viewModelScope.launch {
-            _loading.value = true
-
-            val result = repository.getUser()
-            result.onSuccess {
-                _loading.value = false
-                userState = it
-                _errorMessage.value = null
-            }.onFailure { throwable ->
-                _loading.value = false
-                _errorMessage.value = throwable.message
-            }
-        }
-    }
 
 
 
@@ -67,15 +53,15 @@ class QuestionTwoViewModel(
             _loading.value = true
 
 
-            val result = repository.getQ2Data()
+            val result = repository.getLocalSyndromeIdentificationDataQ2()
 
-            result.onSuccess {
+            if (result != null) {
                 _loading.value = false
-                getSyndromeIdentificationData = it // ✅ Unit
+                getSyndromeIdentificationData = result // ✅ Unit
                 _errorMessage.value = null
-            }.onFailure { throwable ->
+            }else {
                 _loading.value = false
-                _errorMessage.value = throwable.message
+                _errorMessage.value = "no data found"
             }
 
 

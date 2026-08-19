@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.SyndromeIdentificationData
 import com.medical.buganddrug.data.model.QoestionsModel.Q2Model.ClinicalSyndromeResponseModel
 import com.medical.buganddrug.data.model.QoestionsModel.Q2Model.QuestionTwoResponseModel
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
@@ -28,7 +29,7 @@ class ClinicalSyndromeViewModel(
     val loading: StateFlow<Boolean> = _loading
 
 
-    var getSyndromeIdentificationData by mutableStateOf<ClinicalSyndromeResponseModel?>(null) // ✅ since repo returns Result<Unit>
+    var getSyndromeIdentificationData by mutableStateOf<SyndromeIdentificationData?>(null) // ✅ since repo returns Result<Unit>
         private set
 
 
@@ -42,19 +43,24 @@ class ClinicalSyndromeViewModel(
 
 
 
+    var allExtractedDiseases by mutableStateOf<List<com.medical.buganddrug.data.model.LocalStorageDatamodel.DiseaseItem>>(emptyList())
+        private set
+
     fun getClinicalSyndromeData() {
         viewModelScope.launch {
             _loading.value = true
 
-            val result = repository.getClinicalSyndromeData()
+            val result = repository.getLocalSyndromeIdentificationData()
+            val extractedList = repository.getDiseaseListFromLocalDatabase()
+            allExtractedDiseases = extractedList
 
-            result.onSuccess {
+            if (result != null) {
                 _loading.value = false
-                getSyndromeIdentificationData = it // ✅ Unit
+                getSyndromeIdentificationData = result // ✅ Unit
                 _errorMessage.value = null
-            }.onFailure { throwable ->
+            }else {
                 _loading.value = false
-                _errorMessage.value = throwable.message
+                _errorMessage.value = "no data found"
             }
 
 

@@ -30,6 +30,7 @@ import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.medical.buganddrug.pickImages
+import com.medical.buganddrug.ui.QuickIDConsult.topBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,8 +62,10 @@ fun BugReportScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Report a Bug") }
+            topBar(
+                topic = "Report a Bug",
+                patientType = "Let us know what went wrong and attach screenshots if possible.",
+                onBackClick = onBackClick
             )
         },
         bottomBar = {

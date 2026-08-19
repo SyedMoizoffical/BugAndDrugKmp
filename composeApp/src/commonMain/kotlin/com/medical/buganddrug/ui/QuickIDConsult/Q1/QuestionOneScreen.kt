@@ -221,11 +221,11 @@ fun QsafaStepOneScreen(
             // QSOFA Card
             ElevatedCard(
                 shape = RoundedCornerShape(20.dp),
-                elevation = CardDefaults.elevatedCardElevation(6.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.98f))
+                elevation = CardDefaults.elevatedCardElevation(4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text("qSOFA", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("qSOFA Assessment", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, color = Color(0xFF800080)))
                     Spacer(Modifier.height(12.dp))
 
                     qsofaQuestions.forEach { question ->

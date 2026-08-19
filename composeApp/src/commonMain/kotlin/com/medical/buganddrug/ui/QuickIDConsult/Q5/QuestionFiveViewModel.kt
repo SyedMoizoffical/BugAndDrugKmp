@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.medical.buganddrug.data.model.QoestionsModel.Q5Model.AntibioticDose
-import com.medical.buganddrug.data.model.QoestionsModel.Q5Model.RenalFunctionCategory
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.AntibioticDose
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.RenalFunctionCategory
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
 import com.medical.buganddrug.data.repository.QuestionsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,15 +38,15 @@ class QuestionFiveViewModel (
     fun getQ5Data() {
         viewModelScope.launch {
             _loading.value = true
-            val result = repository.getQ5Data()
-            result.onSuccess {
+            val result = repository.getLocalCreatinineClearance()
+            if (result != null) {
                 _loading.value = false
-                renalCategories = it!!.renalFunctionCategories
-                antibioticDoses = it!!.antibioticDoses
+                renalCategories = result!!.renalFunctionCategories
+                antibioticDoses = result!!.antibioticDoses
                 _errorMessage.value = null
-            }.onFailure { throwable ->
+            }else {
                 _loading.value = false
-                _errorMessage.value = throwable.message
+                _errorMessage.value = "no data found"
             }
         }
     }

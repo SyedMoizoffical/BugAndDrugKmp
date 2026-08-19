@@ -374,17 +374,17 @@ fun VaccineIndicationScreen(
                     EmptyCardMessage()
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = onSubmit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    enabled = selectedIndex != null,
-                ) {
-                    Text("Continue")
-                }
+//                Spacer(modifier = Modifier.height(24.dp))
+//
+//                Button(
+//                    onClick = onSubmit,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(50.dp),
+//                    enabled = selectedIndex != null,
+//                ) {
+//                    Text("Continue")
+//                }
             }
         }
     }
@@ -465,7 +465,12 @@ fun InfoRow(label: String, value: String) {
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.primary
         )
-        Text(value, color = MaterialTheme.colorScheme.onSurface)
+        com.medical.buganddrug.util.ClickableDiseaseText(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        )
         Divider(
             color = MaterialTheme.colorScheme.outlineVariant,
             thickness = 0.5.dp,

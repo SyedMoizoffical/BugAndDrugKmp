@@ -24,6 +24,7 @@ import com.medical.buganddrug.ui.QuickIDConsult.Q4.QuestionFourViewModel
 import com.medical.buganddrug.ui.QuickIDConsult.Q5.AppSurveyViewModel
 import com.medical.buganddrug.ui.QuickIDConsult.Q5.QuestionFiveScreen
 import com.medical.buganddrug.ui.QuickIDConsult.Q5.QuestionFiveViewModel
+import com.medical.buganddrug.ui.QuickIDConsult.Q5.QuestionSixFilterScreen
 import com.medical.buganddrug.ui.QuickIDConsult.Q5.QuestionSixScreen
 import com.medical.buganddrug.ui.QuickIDConsult.Q5.QuestionSixViewModel
 import com.medical.buganddrug.ui.QuickIDConsult.Q7.QuestionSampleCollectionScreen
@@ -31,6 +32,8 @@ import com.medical.buganddrug.ui.Survey.PostAppSurveyScreen
 import com.medical.buganddrug.ui.Survey.PreAppTrainingSurveyScreen
 import com.medical.buganddrug.ui.VaccineIndication.VaccineIndicationScreen
 import com.medical.buganddrug.ui.antimicrobial.AntimicrobialSpectrumScreen
+import com.medical.buganddrug.ui.FilterScreen.ClinicalSyndromeFilterScreen
+import com.medical.buganddrug.ui.FilterScreen.EtiologicalAgentFilterScreen
 import com.medical.buganddrug.ui.clinicalSyndrome.ClinicalSyndromeScreen
 import com.medical.buganddrug.ui.clinicalSyndrome.ClinicalSyndromeViewModel
 import com.medical.buganddrug.ui.onboarding.InpatientQuestion
@@ -81,6 +84,7 @@ object AppScreens {
         @Composable
         override fun Content() {
             val navigator = LocalNavigator.currentOrThrow
+            val viewModel: AuthViewModel = koinInject()
 
             PatientTypeSelectionScreen(
                 onPatientInfoClick = { navigator?.push(PatientDetail)},
@@ -91,7 +95,8 @@ object AppScreens {
                 onBackClick = { navigator?.pop() },
                 onBugReportClick = { navigator?.push(BugReport) },
                 onPrivacyPolicyClick = { navigator?.push(Disclaimer) },
-                onLogoutClick = { navigator?.push(Logout) }
+                onLogoutClick = { navigator?.push(Logout) },
+                authViewModel =viewModel
             )
         }
     }
@@ -266,6 +271,54 @@ object AppScreens {
             val navigator = LocalNavigator.currentOrThrow
             val vm: ClinicalSyndromeViewModel = koinInject()
             ClinicalSyndromeScreen(vm) { navigator?.pop() }
+        }
+    }
+
+    class ClinicalSyndromeFilter(
+        private val diseaseId: Int? = null,
+        private val diseaseName: String? = null
+    ) : Screen {
+        @Composable override fun Content() {
+            val navigator = LocalNavigator.currentOrThrow
+            val vm: ClinicalSyndromeViewModel = koinInject()
+            ClinicalSyndromeFilterScreen(
+                viewModel = vm,
+                onBackClick = { navigator?.pop() },
+                diseaseId = diseaseId,
+                diseaseName = diseaseName
+            )
+        }
+    }
+
+    class EtiologicalAgentFilter(
+        private val organismId: Int? = null,
+        private val organismName: String? = null
+    ) : Screen {
+        @Composable override fun Content() {
+            val navigator = LocalNavigator.currentOrThrow
+            val vm: EtiologicalAgentScreenViewModel = koinInject()
+            EtiologicalAgentFilterScreen(
+                viewModel = vm,
+                onBackClick = { navigator?.pop() },
+                organismId = organismId,
+                organismName = organismName
+            )
+        }
+    }
+
+    class QuestionSixFilter(
+        private val antibioticId: Int? = null,
+        private val antibioticName: String? = null
+    ) : Screen {
+        @Composable override fun Content() {
+            val navigator = LocalNavigator.currentOrThrow
+            val vm: QuestionSixViewModel = koinInject()
+            QuestionSixFilterScreen(
+                viewModel = vm,
+                onBackClick = { navigator?.pop() },
+                antibioticId = antibioticId,
+                antibioticName = antibioticName
+            )
         }
     }
 

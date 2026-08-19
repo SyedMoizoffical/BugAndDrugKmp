@@ -21,7 +21,7 @@ import androidx.compose.ui.draw.clip
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
-import com.medical.buganddrug.data.model.QoestionsModel.Q5Model.AntibioticDose
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.AntibioticDose
 import com.medical.buganddrug.ui.QuickIDConsult.Q3.SingleSelectSearchableSpinnerDialog
 import com.medical.buganddrug.ui.theme.cardLightBackgroundColor
 import com.medical.buganddrug.util.ErrorAlertDialog
@@ -133,8 +133,8 @@ fun QuestionFiveScreen(
 
                         // find renal category from API
                         viewModel.renalCategories.find { cat ->
-                            val from = cat.eGFRFrom.toDoubleOrNull() ?: Double.MIN_VALUE
-                            val to = cat.eGFRTo.toDoubleOrNull() ?: Double.MAX_VALUE
+                            val from = cat.eGFRFrom!!.toDoubleOrNull() ?: Double.MIN_VALUE
+                            val to = cat.eGFRTo!!.toDoubleOrNull() ?: Double.MAX_VALUE
                             clearance >= from && clearance <=to
                         }?.let { renalCategory = it.renalFunctionCategory }
                     }
@@ -165,7 +165,7 @@ fun QuestionFiveScreen(
 
                 SingleSelectSearchableSpinnerDialog(
                     label = "Select Antibiotic",
-                    items = antibioticList.map { it to it },
+                    items = antibioticList.map { it!! to it },
                     itemLabel = { it.first },
                     selectedItem = selectedAntibiotic,
                     onItemSelected = { selected ->
@@ -210,7 +210,8 @@ fun QuestionFiveScreen(
                             Icon(
                                 painter = painterResource(Res.drawable.first_aid_kit),
                                 contentDescription = "Table Icon",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(48.dp)
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
@@ -270,10 +271,10 @@ fun getAdjustedDoseFromApi(
 
     // Hemodialysis check
     if (dialysis) {
-        return doses.find { it.antibioticName == antibiotic && it.creatinineClearanceRange.contains("Hemodialysis", true) }
+        return doses.find { it.antibioticName == antibiotic && it.creatinineClearanceRange!!.contains("Hemodialysis", true) }
     }
 
-    return doses.find { it.antibioticName == antibiotic && matchesRange(it.creatinineClearanceRange, crCl) }
+    return doses.find { it.antibioticName == antibiotic && matchesRange(it.creatinineClearanceRange!!, crCl) }
 }
 
 private fun matchesRange(range: String, crCl: Double): Boolean {

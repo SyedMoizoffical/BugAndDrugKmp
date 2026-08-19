@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medical.buganddrug.data.model.AntimicrobialSpectrumData.AntimicrobialSpectrumModel
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.BacteriaSusceptibilityList
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
 import com.medical.buganddrug.data.repository.QuestionsRepository
 
@@ -28,7 +29,7 @@ class AntimicrobialSpectrumViewModel (
     val loading: StateFlow<Boolean> = _loading
 
 
-    var getSyndromeIdentificationData by mutableStateOf<AntimicrobialSpectrumModel?>(null) // ✅ since repo returns Result<Unit>
+    var getSyndromeIdentificationData by mutableStateOf<BacteriaSusceptibilityList?>(null) // ✅ since repo returns Result<Unit>
         private set
 
 
@@ -54,15 +55,15 @@ class AntimicrobialSpectrumViewModel (
 
 
 
-                val result = repository.getAntimicrobialSpectrumData()
+                val result = repository.getLocalBacteriaSusceptibilityList()
 
-                result.onSuccess {
+                if (result != null){
                     _loading.value = false
-                    getSyndromeIdentificationData = it // ✅ Unit
+                    getSyndromeIdentificationData = result // ✅ Unit
                     _errorMessage.value = null
-                }.onFailure { throwable ->
+                }else {
                     _loading.value = false
-                    _errorMessage.value = throwable.message
+                    _errorMessage.value = "No data found"
                 }
             }
 

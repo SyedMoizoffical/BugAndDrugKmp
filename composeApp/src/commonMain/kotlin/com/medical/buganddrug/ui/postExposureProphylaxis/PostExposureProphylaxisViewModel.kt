@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.ExposureProPhylaxisList
 import com.medical.buganddrug.data.model.QoestionsModel.Q4Model.GetPrecautionFinderList
 import com.medical.buganddrug.data.model.postExosureProplaxisModel.ExposureProPhylaxisModel
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
@@ -26,7 +27,7 @@ class PostExposureProphylaxisViewModel (
     val loading: StateFlow<Boolean> = _loading
 
 
-    var getPrecautionFinderList by mutableStateOf<ExposureProPhylaxisModel?>(null) // ✅ since repo returns Result<Unit>
+    var getPrecautionFinderList by mutableStateOf<ExposureProPhylaxisList?>(null) // ✅ since repo returns Result<Unit>
         private set
 
 
@@ -43,15 +44,15 @@ class PostExposureProphylaxisViewModel (
             println(sharedPrefs.getPatientData())
 
 
-            val result = repository.getExposureProPhylaxisModel()
+            val result = repository.getLocalExposureProPhylaxisList()
 
-            result.onSuccess {
+            if (result != null) {
                 _loading.value = false
-                getPrecautionFinderList = it // ✅ Unit
+                getPrecautionFinderList = result // ✅ Unit
                 _errorMessage.value = null
-            }.onFailure { throwable ->
+            }else {
                 _loading.value = false
-                _errorMessage.value = throwable.message
+                _errorMessage.value = "no data found"
             }
 
 

@@ -45,7 +45,7 @@ import buganddrug_multiplateform.composeapp.generated.resources.ExpandLess
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
 import buganddrug_multiplateform.composeapp.generated.resources.left_arrow
-import com.medical.buganddrug.data.model.hivCenterModel.HivArtCenter
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.HivArtCenter
 import org.jetbrains.compose.resources.painterResource
 
 sealed class CenterUiLevel {
@@ -125,7 +125,7 @@ fun CenterScreen(
 
                         CenterUiLevel.Province -> {
                             ProvinceList(
-                                provinces = filteredCenters.map { it.province }.distinct(),
+                                provinces = filteredCenters.map { it.province!! }.distinct(),
                                 onSelect = { level = CenterUiLevel.City(it) }
                             )
                         }
@@ -290,7 +290,7 @@ fun CenterList(centers: List<HivArtCenter>) {
                 ) {
 
                     Text(
-                        text = center.center,
+                        text = center.center!!,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )

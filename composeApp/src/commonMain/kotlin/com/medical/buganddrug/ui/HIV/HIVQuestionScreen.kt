@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -66,20 +67,20 @@ fun GuideSelector(
             .padding(horizontal = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        GuideType.values().forEach { type ->
+        GuideType.entries.forEach { type ->
             val isSelected = selected == type
 
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .height(44.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        color = if (isSelected) Color(0xFF800080) else Color.White
+                    )
                     .border(
                         width = 1.dp,
-                        color = if (isSelected) Color(0xFF800080) else Color(0xFF800080),
-                        shape = RoundedCornerShape(14.dp)
-                    )
-                    .background(
-                        color = if (isSelected) Color(0xFF800080) else Color.White,
+                        color = if (isSelected) Color(0xFF800080) else Color(0xFFE2E8F0),
                         shape = RoundedCornerShape(14.dp)
                     )
                     .clickable { onSelect(type) },
@@ -88,7 +89,7 @@ fun GuideSelector(
                 Text(
                     text = type.title,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                     color = if (isSelected) Color.White else Color(0xFF800080)
                 )
             }
@@ -102,7 +103,7 @@ fun QuestionCard(
     isExpanded: Boolean,
     onToggle: () -> Unit
 ) {
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(
@@ -110,7 +111,7 @@ fun QuestionCard(
                 indication = null
             ) { onToggle() },
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(8.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column {
@@ -126,11 +127,11 @@ fun QuestionCard(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Medium,
-                        color = md_theme_light_shadow
-                    )                )
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF1B2B5D)
+                    )
+                )
 
                 Icon(
                     painter = painterResource(Res.drawable.arrow_drop_down),
@@ -150,7 +151,7 @@ fun QuestionCard(
                 Column {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 20.dp),
-                        color = Color(0xFFF0F0F0)
+                        color = Color(0xFFE2E8F0)
                     )
                     val lines = remember(question.details) { question.details.lines() }
                     val headingRegex = Regex("""^\s*\d+(\.\d+)*\.?\s""")
@@ -163,8 +164,8 @@ fun QuestionCard(
 
                                 withStyle(
                                     SpanStyle(
-                                        color = if (isHeading) Color(0xFF800080) else Color(0xFF1B2B5D),
-                                        fontWeight = if (isHeading) FontWeight.SemiBold else FontWeight.Normal
+                                        color = if (isHeading) Color(0xFF800080) else Color(0xFF1E293B),
+                                        fontWeight = if (isHeading) FontWeight.Bold else FontWeight.Normal
                                     )
                                 ) {
                                     append(line)
@@ -178,8 +179,6 @@ fun QuestionCard(
                         modifier = Modifier.padding(20.dp),
                         lineHeight = 24.sp
                     )
-
-
                 }
             }
         }

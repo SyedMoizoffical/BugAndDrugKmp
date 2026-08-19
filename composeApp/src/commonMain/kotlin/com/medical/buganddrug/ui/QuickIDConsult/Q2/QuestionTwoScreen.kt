@@ -35,7 +35,7 @@ import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
 import buganddrug_multiplateform.composeapp.generated.resources.info
 import buganddrug_multiplateform.composeapp.generated.resources.reportissue
-import com.medical.buganddrug.data.model.QoestionsModel.Q2Model.DiseaseIdentificationLists
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.DiseaseIdenticifationlistsX
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -63,7 +63,7 @@ fun QuestionTwoScreen(
     var selectedLevel1Id by remember { mutableStateOf<Int?>(null) }
     var selectedLevel2Id by remember { mutableStateOf<Int?>(null) }
     var noOfDays by remember { mutableStateOf<String>("") }
-    var matchedDiseases by remember { mutableStateOf<List<DiseaseIdentificationLists>>(emptyList()) }
+    var matchedDiseases by remember { mutableStateOf<List<DiseaseIdenticifationlistsX>>(emptyList()) }
     var selectedItemsJsonArray by remember {
         mutableStateOf<JsonArray>(buildJsonArray { })
     }
@@ -86,7 +86,7 @@ fun QuestionTwoScreen(
         response
             ?.filter {
                 (!isFever || it.durationofdays == compareValue) &&
-                        it.symptomId.toInt() == feverId
+                        it.symptomId!!.toInt() == feverId
             }
             ?.distinctBy { it.localizationId }
             ?.map { it.localization to it.localizationId }
@@ -99,7 +99,7 @@ fun QuestionTwoScreen(
         response?.filter {
             it.localizationId == selectedLocalizationId &&
                     (!isFever || it.durationofdays == compareValue) &&
-                    it.symptomId.toInt() == feverId
+                    it.symptomId!!.toInt() == feverId
         }?.distinctBy { it.level1classificationId }
             ?.map { it.level1classification to it.level1classificationId }
             ?: emptyList()
@@ -111,7 +111,7 @@ fun QuestionTwoScreen(
                     it.level1classificationId == selectedLevel1Id &&
                     it.level2classification != "Not Required" &&
                     (!isFever || it.durationofdays == compareValue) &&
-                    it.symptomId.toInt() == feverId
+                    it.symptomId!!.toInt() == feverId
         }?.distinctBy { it.level2classificationId }
             ?.map { it.level2classification to it.level2classificationId }
             ?: emptyList()
@@ -129,7 +129,7 @@ fun QuestionTwoScreen(
                     data.level1classificationId == selectedLevel1Id &&
                     (selectedLevel2Id == null || data.level2classificationId == selectedLevel2Id) &&
                     (!isFever || data.durationofdays == compareValue) &&
-                    data.symptomId.toInt() == feverId
+                    data.symptomId!!.toInt() == feverId
         } ?: emptyList()
     }
 
@@ -247,7 +247,7 @@ fun QuestionTwoScreen(
                             SingleSelectSearchableSpinnerDialog(
                                 label = "Localization",
                                 items = localizations,
-                                itemLabel = { it.first },
+                                itemLabel = { it.first!! },
                                 selectedItem = selectedLocalizationId,
                                 onItemSelected = {
                                     selectedLocalizationId = it?.second
@@ -263,7 +263,7 @@ fun QuestionTwoScreen(
                             SingleSelectSearchableSpinnerDialog(
                                 label = "Level 1 Classification",
                                 items = level1Classifications,
-                                itemLabel = { it.first },
+                                itemLabel = { it.first!! },
                                 selectedItem = selectedLevel1Id,
                                 onItemSelected = {
                                     selectedLevel1Id = it?.second
@@ -278,7 +278,7 @@ fun QuestionTwoScreen(
                             SingleSelectSearchableSpinnerDialog(
                                 label = "Level 2 Classification",
                                 items = level2Classifications,
-                                itemLabel = { it.first },
+                                itemLabel = { it.first!! },
                                 selectedItem = selectedLevel2Id,
                                 onItemSelected = {
                                     selectedLevel2Id = it?.second
@@ -294,7 +294,7 @@ fun QuestionTwoScreen(
                 if (showCard && matchedDiseases.isNotEmpty()) {
                     ElevatedCard(
                         modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.elevatedCardElevation(6.dp),
+                        elevation = CardDefaults.elevatedCardElevation(4.dp),
                         shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
@@ -307,14 +307,14 @@ fun QuestionTwoScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                    .background(Color(0xFF800080).copy(alpha = 0.1f))
                                     .padding(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
                                     painter = painterResource(Res.drawable.reportissue),
                                     contentDescription = "Report Icon",
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = Color(0xFF800080)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
@@ -322,7 +322,7 @@ fun QuestionTwoScreen(
                                     style = MaterialTheme.typography.titleLarge.copy(
                                         fontWeight = FontWeight.Bold
                                     ),
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = Color(0xFF800080)
                                 )
                             }
 
@@ -389,8 +389,8 @@ fun QuestionTwoScreen(
                                                         .padding(vertical = 6.dp)
                                                 ) {
                                                     // Disease Name
-                                                    Text(
-                                                        text = diseaseName,
+                                                    com.medical.buganddrug.util.ClickableDiseaseText(
+                                                        text = diseaseName!!,
                                                         style = MaterialTheme.typography.bodyMedium.copy(
                                                             fontWeight = FontWeight.Medium
                                                         )
@@ -399,7 +399,7 @@ fun QuestionTwoScreen(
                                                     Spacer(modifier = Modifier.height(2.dp))
 
                                                     // Test Names (each on new line)
-                                                    Text(
+                                                    com.medical.buganddrug.util.ClickableDiseaseText(
                                                         text = testNames,
                                                         style = MaterialTheme.typography.bodyMedium
                                                     )
@@ -645,10 +645,10 @@ fun <T> MultiSelectInputSearchableSpinnerDialog(
 @Composable
 fun <T> SingleSelectSearchableSpinnerDialog(
     label: String,
-    items: List<Pair<String, T>>,
-    itemLabel: (Pair<String, T>) -> String,
+    items: List<Pair<String?, Int?>>,
+    itemLabel: (Pair<String?, Int?>) -> String,
     selectedItem: T?,
-    onItemSelected: (Pair<String, T>?) -> Unit
+    onItemSelected: (Pair<String?, Int?>?) -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var searchText by remember {

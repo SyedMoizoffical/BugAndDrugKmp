@@ -1,6 +1,7 @@
 package com.medical.buganddrug.data.remote
 
 import com.medical.buganddrug.AppModule.appModule
+import com.medical.buganddrug.AppModule.platformModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 
@@ -10,6 +11,7 @@ fun initKoin(config: KoinAppDeclaration? = null) =
 
         modules(
             appModule,
+            platformModule,
             networkModule
         )
     }

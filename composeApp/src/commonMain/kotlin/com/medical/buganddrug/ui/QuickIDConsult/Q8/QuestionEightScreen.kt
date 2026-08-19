@@ -90,7 +90,7 @@ fun QuestionEightScreen(
 
                 response != null -> {
                   val geneList = response.antibioticGeneListDtos
-                    val organisms = geneList.map { it.organism to it.id }
+                    val organisms = geneList.map { it.organism!! to it.id }
 
                     Column(
                         modifier = Modifier
@@ -252,10 +252,10 @@ fun IsolationDetailCardAB_Gen(selectedGene: AntibioticGeneListDto) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            InfoRowAB_Gen("Resistant Gene", selectedGene.resistantGene)
-            InfoRowAB_Gen("Typically Resistant Against", selectedGene.typicallyResistantAgainst)
-            InfoRowAB_Gen("Drug of Choice", selectedGene.drugofChoice)
-            InfoRowAB_Gen("Comments", selectedGene.comments)
+            InfoRowAB_Gen("Resistant Gene", selectedGene.resistantGene!!)
+            InfoRowAB_Gen("Typically Resistant Against", selectedGene.typicallyResistantAgainst!!)
+            InfoRowAB_Gen("Drug of Choice", selectedGene.drugofChoice!!)
+            InfoRowAB_Gen("Comments", selectedGene.comments!!)
         }
     }
 }

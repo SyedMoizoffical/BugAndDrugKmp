@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -79,7 +80,7 @@ fun ClinicalSyndromeScreen(
                         .map { it.syndromeName to it.syndromeId }
 
                     val filteredSyndromes = syndromeList.filter {
-                        it.first.contains(searchQuery, ignoreCase = true)
+                        it.first!!.contains(searchQuery, ignoreCase = true)
                     }
 
                     val filteredDiseases = if (selectedSyndromeId != null) {
@@ -160,7 +161,14 @@ fun ClinicalSyndromeScreen(
                                 onValueChange = { searchQuery = it },
                                 modifier = Modifier.fillMaxWidth(),
                                 label = { Text("Search Syndrome") },
-                                singleLine = true
+                                singleLine = true,
+                                shape = RoundedCornerShape(16.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFF800080),
+                                    unfocusedBorderColor = Color(0xFFE0E0E0),
+                                    focusedContainerColor = Color.White,
+                                    unfocusedContainerColor = Color.White
+                                )
                             )
 
                             LazyColumn(
@@ -178,18 +186,31 @@ fun ClinicalSyndromeScreen(
                                                 selectedSyndromeId = item.second
                                                 selectedDiseaseId = null
                                             },
-                                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
+                                        shape = RoundedCornerShape(14.dp),
+                                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                                         colors = CardDefaults.cardColors(
                                             containerColor = Color.White
                                         )
                                     ) {
-                                        Text(
-                                            text = item.first,
+                                        Row(
                                             modifier = Modifier.padding(16.dp),
-                                            style = MaterialTheme.typography.bodyLarge.copy(
-                                                fontWeight = FontWeight.Medium
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(4.dp)
+                                                    .height(20.dp)
+                                                    .background(Color(0xFF800080), RoundedCornerShape(2.dp))
                                             )
-                                        )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Text(
+                                                text = item.first!!,
+                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = Color(0xFF1B2B5D)
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -214,16 +235,29 @@ fun ClinicalSyndromeScreen(
                                             .fillMaxWidth()
                                             .padding(vertical = 5.dp)
                                             .clickable { selectedDiseaseId = item.second },
-                                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
+                                        shape = RoundedCornerShape(14.dp),
+                                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                                         colors = CardDefaults.cardColors(containerColor = Color.White)
                                     ) {
-                                        Text(
-                                            text = item.first,
+                                        Row(
                                             modifier = Modifier.padding(16.dp),
-                                            style = MaterialTheme.typography.bodyLarge.copy(
-                                                fontWeight = FontWeight.Medium
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(4.dp)
+                                                    .height(20.dp)
+                                                    .background(Color(0xFF800080), RoundedCornerShape(2.dp))
                                             )
-                                        )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Text(
+                                                text = item.first!!,
+                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = Color(0xFF1B2B5D)
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -245,88 +279,81 @@ fun ClinicalSyndromeScreen(
                                     item {
                                         DetailCard(
                                             title = "Etiological Agents",
-                                            content =  detail.map { item ->
-                                                item.etiologicalAgent
-                                            }
+                                            content = detail.map { item -> item.etiologicalAgent!! },
+                                            diseaseList = viewModel.allExtractedDiseases
                                         )
                                     }
                                 }
 
-                                selecteddiseaseIdenticifationlists.let { list ->
+                                selecteddiseaseIdenticifationlists?.let { list ->
                                     item {
                                         DetailCard(
                                             title = "Core Symptoms",
-                                            content = list.map { item ->
-                                                item.coreSymptoms
-                                            }
+                                            content = list.map { item -> item.coreSymptoms!! },
+                                            diseaseList = viewModel.allExtractedDiseases
                                         )
                                     }
                                 }
-                                selecteddiseaseIdenticifationlists.let { list ->
+
+                                selecteddiseaseIdenticifationlists?.let { list ->
                                     item {
                                         DetailCard(
                                             title = "Optional Symptoms",
-                                            content = list.map { item ->
-                                                item.optionalSymptoms
-                                            }
+                                            content = list.map { item -> item.optionalSymptoms!! },
+                                            diseaseList = viewModel.allExtractedDiseases
                                         )
                                     }
                                 }
+
                                 selecteddiseaseIdenticifationlists?.let { syndrome ->
                                     item {
                                         DetailCard(
                                             title = "Relevant Exposure",
-                                            content = syndrome.map { item ->
-                                                item.relevantExposure
-                                            }
+                                            content = syndrome.map { item -> item.relevantExposure!! },
+                                            diseaseList = viewModel.allExtractedDiseases
                                         )
                                     }
                                 }
+
                                 selecteddiseaseIdenticifationlists?.let { syndrome ->
                                     item {
                                         DetailCard(
                                             title = "Sign",
-                                            content = syndrome.map { item ->
-                                                item.signs
-                                            }
+                                            content = syndrome.map { item -> item.signs!! },
+                                            diseaseList = viewModel.allExtractedDiseases
                                         )
                                     }
                                 }
+
                                 selecteddiseaseIdenticifationlists?.let { syndrome ->
                                     item {
                                         DetailCard(
                                             title = "Diagnostic Tests",
-                                            content = syndrome.map { item ->
-                                               item.diagnosticTests
-                                            }
+                                            content = syndrome.map { item -> item.diagnosticTests!! },
+                                            diseaseList = viewModel.allExtractedDiseases
                                         )
                                     }
                                 }
+
                                 selecteddiseaseIdenticifationlists?.let { syndrome ->
                                     item {
                                         DetailCard(
                                             title = "Treatment",
-                                            content = syndrome.map { item ->
-                                               item.treatment
-                                            }
+                                            content = syndrome.map { item -> item.treatment!! },
+                                            diseaseList = viewModel.allExtractedDiseases
                                         )
                                     }
                                 }
+
                                 selecteddiseaseIdenticifationlists?.let { syndrome ->
                                     item {
                                         DetailCard(
                                             title = "Duration Of Treatment",
-                                            content = syndrome.map { item ->
-                                                item.duratioOfTreatment ?: ""
-                                            }
+                                            content = syndrome.map { item -> item.duratioOfTreatment ?: "" },
+                                            diseaseList = viewModel.allExtractedDiseases
                                         )
                                     }
                                 }
-
-
-
-
-
                             }
                         }
                     }
@@ -337,41 +364,68 @@ fun ClinicalSyndromeScreen(
 }
 
 @Composable
-fun DetailCard(
+private fun DetailCard(
     title: String,
-    content: List<String>?
+    content: List<String>?,
+    diseaseList: List<com.medical.buganddrug.data.model.LocalStorageDatamodel.DiseaseItem> = emptyList()
 ) {
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF800080)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .height(18.dp)
+                        .background(Color(0xFF800080), RoundedCornerShape(2.dp))
                 )
-            )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF800080)
+                    )
+                )
+            }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(10.dp))
             val itemsToShow = when {
                 content == null -> listOf("N/A")
-                content.isEmpty() -> listOf("N/A")           // also good to handle empty list
-                else -> content.map { it ?: "N/A" }          // ← key fix: replace null with "N/A"
+                content.isEmpty() -> listOf("N/A")
+                else -> content.map { it ?: "N/A" }
             }
             itemsToShow.forEach { item ->
-                Text(
-                    text = "• $item",
-                    color = Color(0xFF424242)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.Top) {
+                    Text("• ", color = Color(0xFF616161), fontWeight = FontWeight.Bold)
+                    if (item == "N/A") {
+                        Text(
+                            text = "N/A",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = Color(0xFF9E9E9E),
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                            )
+                        )
+                    } else {
+                        com.medical.buganddrug.util.ClickableDiseaseText(
+                            text = item,
+                            diseaseList = diseaseList,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = Color(0xFF212121),
+                                lineHeight = 22.sp
+                            )
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
             }
         }
     }
 }
-

@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.News2ScoringPossibility
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.QSofaScoringPossibility
 import com.medical.buganddrug.data.model.QoestionsModel.Q1Model.NewsItem
 import com.medical.buganddrug.data.model.QoestionsModel.Q1Model.NewsPostRequest
 import com.medical.buganddrug.data.model.QoestionsModel.Q1Model.QsofaNewsResponse
@@ -29,7 +31,7 @@ class QuestionViewModel (
     val loading: StateFlow<Boolean> = _loading
 
 
-    var q1QSofaResponse by mutableStateOf<QsofaNewsResponse?>(null) // ✅ since repo returns Result<Unit>
+    var q1QSofaResponse by mutableStateOf<QSofaScoringPossibility?>(null) // ✅ since repo returns Result<Unit>
         private set
 
 
@@ -47,15 +49,7 @@ class QuestionViewModel (
     ) {
         viewModelScope.launch {
             _loading.value = true
-//            val resultString = sharedPrefs.getPatientData().toString()
-//            val jsonObject = Json.parseToJsonElement(resultString).jsonObject
 //
-//            val sourceId = jsonObject["source"]
-//                ?.jsonPrimitive
-//                ?.content
-//                .orEmpty()
-//sourceId is uniq id for user not use becase it cut off the patieny info
-            println(sharedPrefs.getPatientData())
             val patientInfo = Q1QSofaRequestModel(
                 infoId = "1",
                 respiratoryRate=respiratoryRate,
@@ -64,15 +58,21 @@ class QuestionViewModel (
 
             )
 
-            val result = repository.submitQ1QSofa(patientInfo)
+            val result = repository.getLocalQSofaScoringPossibilities()
 
-            result.onSuccess {
-                _loading.value = false
-                q1QSofaResponse = it // ✅ Unit
+            val sum = respiratoryRate + systolicBP + gcsScore
+
+            val response = result?.find {
+                it.score?.toIntOrNull() == sum
+            }
+
+            _loading.value = false
+
+            if (response != null) {
+                q1QSofaResponse = response
                 _errorMessage.value = null
-            }.onFailure { throwable ->
-                _loading.value = false
-                _errorMessage.value = throwable.message
+            } else {
+                _errorMessage.value = "No data found"
             }
 
 
@@ -91,16 +91,7 @@ class QuestionViewModel (
     ) {
         viewModelScope.launch {
             _loading.value = true
-            val resultString = sharedPrefs.getPatientData().toString()
 
-//            val jsonObject = JSONObject(resultString)
-//            val sourceId = jsonObject.getString("source")
-//            val jsonObject = Json.parseToJsonElement(resultString).jsonObject
-//
-//            val sourceId = jsonObject["source"]
-//                ?.jsonPrimitive
-//                ?.content
-//                .orEmpty()
 
             val patientInfo = NewsPostRequest(
                 infoId = "1",
@@ -114,15 +105,26 @@ class QuestionViewModel (
                 Consciousness = Consciousness
             )
 
-            val result = repository.submitQ1News2(patientInfo)
+            val result = repository.getLocalNews2ScoringPossibilities()
 
-            result.onSuccess {
-                _loading.value = false
-                q1QSofaResponse = it
+            val sum = Pulse.Score+RoomAirOrSupplementalO2.Score +RespiratoryRate.Score+SystolicBP.Score+HypercapnicRespiratoryFailure.Score+Temperature.Score+Spo2.Score+Consciousness.Score
+
+            val response = result?.find {
+                it.score == "$sum points"
+            }
+
+            _loading.value = false
+
+            if (response != null) {
+                val qSofaScoringPossibility = QSofaScoringPossibility(
+                     score=response.score,
+                 riskLevel=response.riskLevel,
+                 clinicalResponse=response.clinicalResponse,
+                )
+                q1QSofaResponse = qSofaScoringPossibility
                 _errorMessage.value = null
-            }.onFailure { throwable ->
-                _loading.value = false
-                _errorMessage.value = throwable.message
+            } else {
+                _errorMessage.value = "No data found"
             }
         }
     }

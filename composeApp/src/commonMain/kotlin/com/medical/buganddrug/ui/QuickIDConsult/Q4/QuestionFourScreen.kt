@@ -88,7 +88,7 @@ fun QuestionFourScreen(
 
                 response != null -> {
                     val isolations = response.isolations
-                    val conditions = isolations.map { it.diseaseCondition to it.id }
+                    val conditions = isolations.map { it.diseaseCondition!! to it.id }
 
                     Column(
                         modifier = Modifier
@@ -252,11 +252,11 @@ fun IsolationDetailCard(option: Isolation) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            InfoRow("Transmission", option.transmission)
-            InfoRow("Isolation Precaution", option.isolationPrecuation)
-            InfoRow("Required PPE", option.pPE)
-            InfoRow("Patient Mask", option.typeOfMask)
-            InfoRow("Isolation Duration", option.durationofIsolation)
+            InfoRow("Transmission", option.transmission!!)
+            InfoRow("Isolation Precaution", option.isolationPrecuation!!)
+            InfoRow("Required PPE", option.pPE!!)
+            InfoRow("Patient Mask", option.typeOfMask!!)
+            InfoRow("Isolation Duration", option.durationofIsolation!!)
         }
     }
 }

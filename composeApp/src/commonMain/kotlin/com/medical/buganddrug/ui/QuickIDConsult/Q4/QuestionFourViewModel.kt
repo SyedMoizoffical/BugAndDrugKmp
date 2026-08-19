@@ -39,15 +39,15 @@ class QuestionFourViewModel (
             println(sharedPrefs.getPatientData())
 
 
-            val result = repository.getQ4Data()
+            val result = repository.getLocalPrecautionFinderList()//getQ4Data()
 
-            result.onSuccess {
+           if (result!!.isolations.isNotEmpty()) {
                 _loading.value = false
-                getPrecautionFinderList = it // ✅ Unit
+                getPrecautionFinderList = result // ✅ Unit
                 _errorMessage.value = null
-            }.onFailure { throwable ->
+            }else {
                 _loading.value = false
-                _errorMessage.value = throwable.message
+                _errorMessage.value = "We couldn't find any data. Please log in again and try once more."
             }
 
 

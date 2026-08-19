@@ -27,8 +27,7 @@ import androidx.compose.ui.window.Dialog
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
 import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
-import buganddrug_multiplateform.composeapp.generated.resources.info
-import com.medical.buganddrug.data.model.QoestionsModel.Q2Model.EtilogicalAgentsLists
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.EtilogicalAgent
 import com.medical.buganddrug.ui.QuickIDConsult.topBar
 import com.medical.buganddrug.util.ErrorAlertDialog
 import com.medical.buganddrug.util.LoadingOverlay
@@ -84,7 +83,7 @@ fun EtiologicalAgentScreen(
 
                 response != null -> {
                     val isolations = response.etilogicalAgents
-                    val conditions = isolations.map { it.organism.trim() to it.id }
+                    val conditions = isolations.map { it.organism!!.trim() to it.id }
 
                     Column(
                         modifier = Modifier
@@ -142,10 +141,11 @@ fun EtiologicalAgentScreen(
                                             .padding(12.dp)
                                     ) {
                                         Icon(
-                                            painter = painterResource(Res.drawable.first_aid_kit),
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
+                    painter = painterResource(Res.drawable.first_aid_kit),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                    modifier = Modifier.size(48.dp)
+                )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
                                             text = "Organism Details: ${selectedIsolation.type}",
@@ -230,42 +230,58 @@ fun EtiologicalAgentScreen(
 }
 
 @Composable
-fun IsolationDetailCard(option: EtilogicalAgentsLists) {
+private fun IsolationDetailCard(option: EtilogicalAgent?) {
     Card(
         modifier = Modifier
-            .width(330.dp)
-            .clip(RoundedCornerShape(12.dp)),
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp)),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            InfoRow("Type", option.type)
-            InfoRow("Infections Caused", option.infectionsCaused)
-            InfoRow("First-line Treatment", option.firstlineTreatment)
-            InfoRow("Alternative Treatment Options", option.alternativeTreatmentOptions?:"")
+            InfoRow("Type", option?.type ?: "N/A")
+            InfoRow("Infections Caused", option?.infectionsCaused ?: "N/A")
+            InfoRow("First-line Treatment", option?.firstlineTreatment ?: "N/A")
+            InfoRow("Alternative Treatment Options", if (option?.alternativeTreatmentOptions.isNullOrBlank()) "N/A" else option!!.alternativeTreatmentOptions!!)
         }
     }
 }
 
 @Composable
-fun InfoRow(label: String, value: String) {
-    Column {
+private fun InfoRow(label: String, value: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            label,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.primary
+            text = label,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleSmall,
+            color = Color(0xFF800080)
         )
-        Text(
-            value,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Divider(
-            color = MaterialTheme.colorScheme.outlineVariant,
+        Spacer(modifier = Modifier.height(4.dp))
+        if (value == "N/A") {
+            Text(
+                text = "N/A",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color(0xFF9E9E9E),
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                )
+            )
+        } else {
+            com.medical.buganddrug.util.ClickableDiseaseText(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color(0xFF1E293B),
+                    lineHeight = 22.sp
+                )
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        HorizontalDivider(
+            color = Color(0xFFE2E8F0),
             thickness = 0.5.dp,
             modifier = Modifier.padding(vertical = 4.dp)
         )

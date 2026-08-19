@@ -27,9 +27,9 @@ import androidx.compose.ui.window.Dialog
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.arrow_drop_down
 import buganddrug_multiplateform.composeapp.generated.resources.info
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.ExposureProPhylaxis
 
 import com.medical.buganddrug.data.model.QoestionsModel.Q4Model.Isolation
-import com.medical.buganddrug.data.model.postExosureProplaxisModel.ExposureProPhylaxis
 import com.medical.buganddrug.ui.QuickIDConsult.topBar
 import com.medical.buganddrug.ui.theme.cardLightBackgroundColor
 import com.medical.buganddrug.util.ErrorAlertDialog
@@ -76,7 +76,7 @@ fun PostExposureProphylaxisScreen(
                     val isolations = response.exposureProPhylaxisList
 
                     // Build dropdown list from API
-                    val conditions = isolations.map { it.infection to it.id }
+                    val conditions = isolations.map { it.infection!! to it.id }
 
                     Column(
                         modifier = Modifier
@@ -181,10 +181,10 @@ fun IsolationDetailCard(option: ExposureProPhylaxis) {
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            InfoRow("Definition of Exposure", option.definitionofExposure)
-            InfoRow("PostExposure Risk Assessment", option.postExposureRiskAssessment)
-            InfoRow("Post Exposure Prophylaxis", option.postExposureProphylaxis)
-            InfoRow("Follow Up", option.followUp)
+            InfoRow("Definition of Exposure", option.definitionofExposure!!)
+            InfoRow("PostExposure Risk Assessment", option.postExposureRiskAssessment!!)
+            InfoRow("Post Exposure Prophylaxis", option.postExposureProphylaxis!!)
+            InfoRow("Follow Up", option.followUp!!)
         }
     }
 }
@@ -197,9 +197,11 @@ fun InfoRow(label: String, value: String) {
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.primary
         )
-        Text(
-            value,
-            color = MaterialTheme.colorScheme.onSurface
+        com.medical.buganddrug.util.ClickableDiseaseText(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = MaterialTheme.colorScheme.onSurface
+            )
         )
         Divider(
             color = MaterialTheme.colorScheme.outlineVariant,

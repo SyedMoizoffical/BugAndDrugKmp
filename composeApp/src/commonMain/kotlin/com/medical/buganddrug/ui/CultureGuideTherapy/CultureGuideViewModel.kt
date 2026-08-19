@@ -34,16 +34,16 @@ class CultureGuideViewModel (
             _loading.value = true
 
             try {
+                val result = repository.getLocalCultureTherapyGuideList()//getQ4Data()
 
-                val result = repository.getCultureGuideApi()
+               // val result = repository.getCultureGuideApi()
 
-                result.onSuccess { response ->
-                    _cultureGuideList.value =
-                        response?.cultureTherapyGuidelistDtos.orEmpty()
+              if (result != null) {
+                    _cultureGuideList.value =result.cultureTherapyGuidelistDtos
 
                     _errorMessage.value = null
-                }.onFailure { throwable ->
-                    _errorMessage.value = throwable.message
+                }else {
+                    _errorMessage.value = "No data found"
                 }
 
             } finally {

@@ -18,11 +18,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import buganddrug_multiplateform.composeapp.generated.resources.Res
 import buganddrug_multiplateform.composeapp.generated.resources.first_aid_kit
 import buganddrug_multiplateform.composeapp.generated.resources.info
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.AntibioticDose
 
-import com.medical.buganddrug.data.model.QoestionsModel.Q5Model.AntibioticDose
 import com.medical.buganddrug.ui.QuickIDConsult.Q3.SingleSelectSearchableSpinnerDialog
 import com.medical.buganddrug.ui.QuickIDConsult.topBar
 import com.medical.buganddrug.ui.theme.cardLightBackgroundColor
@@ -79,7 +80,7 @@ fun QuestionSixScreen(
             ) {
 
                 val antibioticList = viewModel.antibioticDoses
-                    .map { it.antibioticName }
+                    .map { it.antibioticName!! }
                     .toSet()
                     .sorted()
 
@@ -100,7 +101,7 @@ fun QuestionSixScreen(
                     selectedItem = selectedAntibiotic,
                     onItemSelected = { selected ->
                         selectedAntibiotic = selected?.second
-                        selectedAntibioticData = viewModel.antibioticDoses.filter { data ->
+                        selectedAntibioticData = viewModel.antibioticDoses.filter { data->
                             data.antibioticName == selectedAntibiotic
                         }
                     }
@@ -155,7 +156,8 @@ private fun AntibioticDetailCard(selectedAntibiotic: String, data: List<Antibiot
                 Icon(
                     painter = painterResource(Res.drawable.first_aid_kit),
                     contentDescription = "Info Icon",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(48.dp)
                 )
                 Spacer(Modifier.width(10.dp))
                 Text(
@@ -170,11 +172,11 @@ private fun AntibioticDetailCard(selectedAntibiotic: String, data: List<Antibiot
             Spacer(Modifier.height(16.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                DetailSection("Antibiotic Class", data.map { it.antibioticClass }.distinct())
+                DetailSection("Antibiotic Class", data.map { it.antibioticClass!! }.distinct())
                 DetailSection("WHO Aware Category", data.map { it.whoawareCategory?:"" }.distinct())
-                DetailSection("Indications", data.map { it.indications }.distinct())
+                DetailSection("Indications", data.map { it.indications!! }.distinct())
 
-                DetailSection("Standard Dosing", data.map { it.standardDose }.distinct())
+                DetailSection("Standard Dosing", data.map { it.standardDose!! }.distinct())
                 Text(
                     text = "Creatinine Clearance Dose Adjustment",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -182,10 +184,10 @@ private fun AntibioticDetailCard(selectedAntibiotic: String, data: List<Antibiot
                 )
 
                 DoseAdjustmentTable(data)
-                DetailSection("Preferred Against", data.map { it.preferredAgainst }.distinct())
-                DetailSection("Pregnancy Class", data.map { it.pregnancyClass }.distinct())
-                DetailSection("Lactation Class", data.map { it.lactationClass }.distinct())
-                DetailSection("Drug Interactions", data.map { it.drugInteractions }.distinct())
+                DetailSection("Preferred Against", data.map { it.preferredAgainst!! }.distinct())
+                DetailSection("Pregnancy Class", data.map { it.pregnancyClass!! }.distinct())
+                DetailSection("Lactation Class", data.map { it.lactationClass!! }.distinct())
+                DetailSection("Drug Interactions", data.map { it.drugInteractions!! }.distinct())
 
 
 
@@ -237,12 +239,12 @@ fun DoseAdjustmentTable(data: List<AntibioticDose>) {
                     .padding(vertical = 8.dp)
             ) {
                 Text(
-                    text = item.creatinineClearanceRange,
+                    text = item.creatinineClearanceRange!!,
                     modifier = Modifier.weight(1f).padding(start = 12.dp),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = item.adjustedDosing,
+                    text = item.adjustedDosing!!,
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -308,19 +310,32 @@ private fun DetailSection(title: String, values: List<String>) {
     Column {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.primary
         )
         Spacer(Modifier.height(4.dp))
-        values.forEach { value ->
+        val items = values.filter { it.isNotBlank() }
+        if (items.isEmpty()) {
             Text(
-                text = value,
+                text = "N/A",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color(0xFF9E9E9E),
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                 )
             )
+        } else {
+            items.forEach { value ->
+                com.medical.buganddrug.util.ClickableDiseaseText(
+                    text = value,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 22.sp
+                    )
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+            }
         }
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .padding(vertical = 8.dp)
                 .fillMaxWidth(),

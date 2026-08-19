@@ -81,7 +81,18 @@ fun WelcomeScreen(
 ) {
     val data by authViewModel.uiState.collectAsState()
 
+    // Check if local database already has data on first launch
+    LaunchedEffect(Unit) {
+        authViewModel.checkLocalDataExists()
+    }
 
+    // If local data exists, skip welcome and go directly to sign-in
+    LaunchedEffect(data.hasLocalData) {
+        if (data.hasLocalData) {
+            onNavigateToSignIn()
+            return@LaunchedEffect
+        }
+    }
 
     LaunchedEffect(data.isExistingUser) {
         if (data.isExistingUser == true) {

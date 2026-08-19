@@ -2,7 +2,8 @@ package com.medical.buganddrug.ui.HIV.HivCenterScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.medical.buganddrug.data.model.hivCenterModel.HivArtCenter
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.HivArtCenter
+
 import com.medical.buganddrug.data.repository.QuestionsRepository
 
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,13 +29,13 @@ class HivArtCenterViewModel (
         viewModelScope.launch {
             _loading.value = true
 
-            repository.fetchCenters()
-                .onSuccess {
-                    _centers.value = it
+           val result = repository.getLocalHivArtCenterList()
+                if (result != null) {
+                    _centers.value = result.hivArtCenters
                     _error.value = null
                 }
-                .onFailure {
-                    _error.value = it.message
+                else {
+                    _error.value = "no data found"
                 }
 
             _loading.value = false

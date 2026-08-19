@@ -3,6 +3,8 @@ package com.medical.buganddrug.data.remote
 import com.medical.buganddrug.data.model.*
 import com.medical.buganddrug.data.model.AntimicrobialSpectrumData.AntimicrobialSpectrumModel
 import com.medical.buganddrug.data.model.CultureTherapyGuideModel.CultureTherapyGuideModel
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.LocalDataModel
+import com.medical.buganddrug.data.model.LocalStorageDatamodel.LocalDataStorageModel
 import com.medical.buganddrug.data.model.QoestionsModel.Q1Model.NewsPostRequest
 import com.medical.buganddrug.data.model.QoestionsModel.Q1Model.QsofaNewsResponse
 import com.medical.buganddrug.data.model.QoestionsModel.Q1QSofaRequestModel
@@ -132,7 +134,9 @@ class ApiService(
     suspend fun getEtiologicalAgent(): ApiResponse<QuestionTwoResponseModel> {
         return client.post("GetSyndromeIdentificationData").body()
     }
-
+    suspend fun getAllDataForLocal(): ApiResponse<LocalDataModel> {
+        return client.post("GetInitialAppData").body()
+    }
 
 
     suspend fun postBugReport(
