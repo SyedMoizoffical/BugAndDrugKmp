@@ -59,6 +59,7 @@ import com.medical.buganddrug.util.LoadingOverlay
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import org.koin.compose.koinInject
 import buganddrug_multiplateform.composeapp.generated.resources.search
 import com.medical.buganddrug.data.model.LocalStorageDatamodel.DiseaseItem
 import com.medical.buganddrug.ui.FilterScreen.ClinicalSyndromeFilterScreen
@@ -85,8 +86,8 @@ fun PatientTypeSelectionScreen(
     onLogoutClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
     authViewModel: AuthViewModel,
-
-    ) {
+    sharedPrefs: SharedPreferenceManager = koinInject()
+) {
     val isLoading by authViewModel.loading.collectAsState()
     val errorMessage by authViewModel.errorMessage.collectAsState()
     val diseaseList by authViewModel.diseaseList.collectAsState()
@@ -95,7 +96,7 @@ fun PatientTypeSelectionScreen(
     var isSearchActive by remember { mutableStateOf(false) }
     var selectedDiseaseForDialog by remember { mutableStateOf<DiseaseItem?>(null) }
 
-    var showDisclaimer by remember { mutableStateOf(false) }
+    var showDisclaimer by remember { mutableStateOf(sharedPrefs.getDisclaimer() != "true") }
     var selectedPatientType by remember { mutableStateOf<String?>(null) }
     var showError by remember { mutableStateOf(false) }
 
@@ -175,7 +176,7 @@ fun PatientTypeSelectionScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -185,7 +186,7 @@ fun PatientTypeSelectionScreen(
                             color = Color(0xFF800080) // Using your theme purple
                         )
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     val appVersion = 1.0
                     Text(
                         text = "Version $appVersion • 2026",
@@ -193,10 +194,14 @@ fun PatientTypeSelectionScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "© 2026 AI/ML Clinical Guide",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                        thickness = 1.dp
+                    )
+                    CopyrightFooter(
+                        isCompact = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -207,7 +212,7 @@ fun PatientTypeSelectionScreen(
                 // Your exact original Top Bar
                 patientTopBar(
                     topic = "Bug & Drug",
-                    patientType = "AI/ML Clinical Guide",
+                    patientType = "Infectious Diseases Clinical Guide",
                     onBackClick = { selectedPatientType = null },
                     onMenuClick = { scope.launch { drawerState.open() } }
                 )
@@ -252,7 +257,14 @@ fun PatientTypeSelectionScreen(
                             OutlinedTextField(
                                 value = searchQuery,
                                 onValueChange = { searchQuery = it },
-                                placeholder = { Text("Search Disease, Organism, Antibiotic...", fontSize = 13.sp, color = Color(0xFF94A3B8)) },
+                                placeholder = {
+                                    Text(
+                                        text = "Search Disease, Organism, Antibiotic...",
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF94A3B8),
+                                        maxLines = 1
+                                    )
+                                },
                                 leadingIcon = {
                                     Icon(
                                         painter = painterResource(Res.drawable.search),
@@ -453,7 +465,7 @@ fun PatientTypeSelectionScreen(
             if (showDisclaimer) {
                 DisclaimerDialog(onDismiss = {
                     showDisclaimer = false
-                   // sharedPrefs.saveDisclaimer("true")
+                    sharedPrefs.saveDisclaimer("true")
                 })
             }
             if (showError) {
@@ -491,6 +503,7 @@ fun PatientTypeSelectionScreen(
                     properties = DialogProperties(
                         usePlatformDefaultWidth = false,
                         decorFitsSystemWindows = false,
+
                         dismissOnBackPress = true,
                         dismissOnClickOutside = false
                     )
@@ -639,7 +652,7 @@ fun TitleLogo(modifier: Modifier = Modifier, small: Boolean = false) {
                     .clip(RoundedCornerShape(32.dp))
         )
         Text(
-            text = "AI/ML Clinical Decision Support",
+            text = "Clinical Decision Support App",
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = Color(0xFF64748B),
                 fontWeight = FontWeight.SemiBold,
@@ -776,7 +789,7 @@ private fun DrawerHeaderElegant() {
         )
 
         Text(
-            text = "AI/ML Clinical Guide",
+            text = "Infectious Diseases Clinical Guide",
             style = MaterialTheme.typography.bodyMedium,
             color = Color(0xFF4B5563)
         )

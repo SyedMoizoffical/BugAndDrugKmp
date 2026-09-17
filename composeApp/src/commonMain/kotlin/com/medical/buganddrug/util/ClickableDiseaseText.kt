@@ -116,6 +116,7 @@ fun ClickableDiseaseText(
                 properties = DialogProperties(
                     usePlatformDefaultWidth = false,
                     decorFitsSystemWindows = false,
+
                     dismissOnBackPress = true,
                     dismissOnClickOutside = false
                 )
@@ -190,10 +191,7 @@ fun buildAnnotatedDiseaseText(
     // Filter disease names present in fullText
     val matchedDiseases = diseaseList.filter { disease ->
         val name = disease.name.trim()
-        name.isNotBlank() && (
-            fullText.contains(name, ignoreCase = true) ||
-            (name.length >= 4 && fullText.trim().equals(name.take(4), ignoreCase = true))
-        )
+        name.isNotBlank() && fullText.contains(name, ignoreCase = true)
     }.sortedByDescending { it.name.length } // Match longer names first
 
     if (matchedDiseases.isEmpty()) {

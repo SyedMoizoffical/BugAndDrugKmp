@@ -1,14 +1,18 @@
 package com.medical.buganddrug.ui.onboarding.NavDrawer
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -116,9 +120,11 @@ fun DisclaimerScreen(
                             "We may update this policy periodically.",
 
                     "6. Contact Information\n" +
-                            "Email: Muneeba.ahsan@duhs.edu.pk\n" +
+                            "Email: bug.drug@duhs.edu.pk\n" +
                             "Organization: Dow University of Health Sciences, Karachi."
                 )
+
+                val uriHandler = LocalUriHandler.current
 
                 points.forEach { point ->
                     point.lines().forEach { line ->
@@ -126,13 +132,41 @@ fun DisclaimerScreen(
                         val isHeading = trimmed.matches(Regex("^\\d+(\\.\\d+)?\\..*")) ||
                                 trimmed.startsWith("2.") || trimmed.startsWith("4.")
 
-                        Text(
-                            text = line,
-                            fontSize = 15.sp,
-                            fontWeight = if (isHeading) FontWeight.SemiBold else FontWeight.Normal,
-                            color = if (isHeading) Color(0xFF800080) else MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(vertical = 2.dp)
-                        )
+                        if (trimmed.startsWith("Email:") || line.contains("bug.drug@duhs.edu.pk")) {
+                            Row(
+                                modifier = Modifier.padding(vertical = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Email: ",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "bug.drug@duhs.edu.pk",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF800080),
+                                    textDecoration = TextDecoration.Underline,
+                                    modifier = Modifier.clickable {
+                                        try {
+                                            uriHandler.openUri("mailto:bug.drug@duhs.edu.pk")
+                                        } catch (e: Exception) {
+                                            // Handle exception if mail client unavailable
+                                        }
+                                    }
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = line,
+                                fontSize = 15.sp,
+                                fontWeight = if (isHeading) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (isHeading) Color(0xFF800080) else MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -149,7 +183,7 @@ fun DisclaimerScreen(
                     .fillMaxWidth()
                     .padding(16.dp),
                 onClick = {
-                    onBackClick
+                    onBackClick()
                 }
             )
 

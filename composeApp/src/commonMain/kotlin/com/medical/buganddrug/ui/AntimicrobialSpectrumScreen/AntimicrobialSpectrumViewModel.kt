@@ -46,29 +46,15 @@ class AntimicrobialSpectrumViewModel (
     fun getAntimicrobialSpectrumData() {
         viewModelScope.launch {
             _loading.value = true
+            val result = repository.getLocalBacteriaSusceptibilityList()
+            _loading.value = false
 
-            val resultString = sharedPrefs.getPatientData().toString()
-            if (resultString.isEmpty() ){
-                _errorMessage.value = "Please fill in patient details first"
-
-            }else{
-
-
-
-                val result = repository.getLocalBacteriaSusceptibilityList()
-
-                if (result != null){
-                    _loading.value = false
-                    getSyndromeIdentificationData = result // ✅ Unit
-                    _errorMessage.value = null
-                }else {
-                    _loading.value = false
-                    _errorMessage.value = "No data found"
-                }
+            if (result != null) {
+                getSyndromeIdentificationData = result
+                _errorMessage.value = null
+            } else {
+                _errorMessage.value = "No data found"
             }
-
-
-
         }
     }
 

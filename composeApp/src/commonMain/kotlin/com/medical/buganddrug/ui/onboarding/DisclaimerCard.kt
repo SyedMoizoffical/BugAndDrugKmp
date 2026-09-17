@@ -126,7 +126,7 @@ fun DisclaimerDialog(onDismiss: () -> Unit) {
                                 "We may update this policy periodically.",
 
                         "6. Contact Information\n" +
-                                "Email: Muneeba.ahsan@duhs.edu.pk\n" +
+                                "Email: bug.drug@duhs.edu.pk\n" +
                                 "Organization: Dow University of Health Sciences, Karachi."
                     )
 

@@ -42,7 +42,7 @@ fun ClinicalSyndromeFilterScreen(
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedSyndromeId by remember { mutableStateOf<Int?>(null) }
-    var selectedDiseaseId by remember(diseaseId) { mutableStateOf<Int?>(if (diseaseId != null && diseaseId != 0) diseaseId else null) }
+    var selectedDiseaseId by remember { mutableStateOf<Int?>(null) }
     var passedDiseaseName by remember(diseaseName) { mutableStateOf<String?>(diseaseName) }
 
     Scaffold(
@@ -97,30 +97,61 @@ fun ClinicalSyndromeFilterScreen(
 
                     val diseaseList = filteredDiseases.map { it.diseaseName to it.diseaseID }
 
-                    val matchedDiseaseFromList = remember(response, selectedDiseaseId, passedDiseaseName) {
-                        diseases.find {
-                            (selectedDiseaseId != null && selectedDiseaseId != 0 && it.diseaseID == selectedDiseaseId) ||
-                            (!passedDiseaseName.isNullOrBlank() && it.diseaseName.equals(passedDiseaseName, ignoreCase = true))
+                    val matchedDiseaseFromList = remember(response, passedDiseaseName, diseaseId) {
+                        if (!passedDiseaseName.isNullOrBlank()) {
+                            val nameToMatch = passedDiseaseName!!.trim()
+                            diseases.find { it.diseaseName?.trim().equals(nameToMatch, ignoreCase = true) }
+                                ?: diseases.find {
+                                    val dName = it.diseaseName?.trim() ?: ""
+                                    dName.isNotBlank() && (
+                                        dName.contains(nameToMatch, ignoreCase = true) ||
+                                        nameToMatch.contains(dName, ignoreCase = true)
+                                    )
+                                }
+                        } else if (diseaseId != null && diseaseId != 0) {
+                            diseases.find { it.diseaseID == diseaseId }
+                        } else {
+                            null
                         }
                     }
 
-                    val effectiveDiseaseId = selectedDiseaseId ?: matchedDiseaseFromList?.diseaseID
-                    val effectiveDiseaseName = matchedDiseaseFromList?.diseaseName ?: passedDiseaseName ?: diseases.find { it.diseaseID == selectedDiseaseId }?.diseaseName
+                    val effectiveDiseaseId = selectedDiseaseId
+                        ?: matchedDiseaseFromList?.diseaseID
+                        ?: (if (passedDiseaseName.isNullOrBlank() && diseaseId != null && diseaseId != 0) diseaseId else null)
 
-                    val selecteddiseaseIdenticifationlists = diseaseIdenticifationlists
-                        .filter { item ->
+                    val effectiveDiseaseName = selectedDiseaseId?.let { sId -> diseases.find { it.diseaseID == sId }?.diseaseName }
+                        ?: matchedDiseaseFromList?.diseaseName
+                        ?: passedDiseaseName
+                        ?: (if (diseaseId != null && diseaseId != 0) diseases.find { it.diseaseID == diseaseId }?.diseaseName else null)
+
+                    val autoSyndromeId = remember(response, effectiveDiseaseId) {
+                        if (effectiveDiseaseId != null && effectiveDiseaseId != 0) {
+                            syndromes.find { it.diseaseID == effectiveDiseaseId }?.syndromeId
+                        } else null
+                    }
+
+                    val currentSyndromeId = selectedSyndromeId ?: autoSyndromeId
+                    val selectedSyndromeName = syndromeList.find { it.second == currentSyndromeId }?.first
+
+                    val selecteddiseaseIdenticifationlists = remember(
+                        response,
+                        effectiveDiseaseId,
+                        effectiveDiseaseName,
+                        selectedSyndromeId
+                    ) {
+                        diseaseIdenticifationlists.filter { item ->
                             val matchById = effectiveDiseaseId != null && effectiveDiseaseId != 0 && item.diseaseId == effectiveDiseaseId
                             val matchByName = !effectiveDiseaseName.isNullOrBlank() && (
-                                item.disease.equals(effectiveDiseaseName, ignoreCase = true) ||
-                                item.disease?.contains(effectiveDiseaseName, ignoreCase = true) == true
+                                item.disease?.trim().equals(effectiveDiseaseName.trim(), ignoreCase = true) ||
+                                item.disease?.contains(effectiveDiseaseName.trim(), ignoreCase = true) == true ||
+                                effectiveDiseaseName.trim().contains(item.disease?.trim() ?: "", ignoreCase = true)
                             )
-                            val matchesDisease = matchById || matchByName
+                            val matchesDisease = if (effectiveDiseaseId != null && effectiveDiseaseId != 0) (matchById || matchByName) else matchByName
                             val matchesSyndrome = selectedSyndromeId == null || item.localizationId == selectedSyndromeId
                             matchesDisease && matchesSyndrome
-                        }
-                        .distinctBy { it.symptomName }
+                        }.distinctBy { it.symptomName }
+                    }
 
-                    val selectedSyndromeName = syndromeList.find { it.second == selectedSyndromeId }?.first
                     val selectedDiseaseName = effectiveDiseaseName
 
                     Column(
@@ -181,7 +212,7 @@ fun ClinicalSyndromeFilterScreen(
                         }
 
                         // 🩺 Step 1: Syndrome Selection
-                        if (selectedSyndromeId == null && selectedDiseaseId == null && passedDiseaseName.isNullOrBlank()) {
+                        if (selectedSyndromeId == null && effectiveDiseaseId == null && effectiveDiseaseName.isNullOrBlank()) {
                             OutlinedTextField(
                                 value = searchQuery,
                                 onValueChange = { searchQuery = it },
@@ -224,7 +255,7 @@ fun ClinicalSyndromeFilterScreen(
 
                         // 🧬 Step 2: Disease Selection
                         AnimatedVisibility(
-                            visible = selectedSyndromeId != null && selectedDiseaseId == null && passedDiseaseName.isNullOrBlank(),
+                            visible = selectedSyndromeId != null && effectiveDiseaseId == null && effectiveDiseaseName.isNullOrBlank(),
                             enter = fadeIn() + expandVertically(),
                             exit = fadeOut() + shrinkVertically()
                         ) {

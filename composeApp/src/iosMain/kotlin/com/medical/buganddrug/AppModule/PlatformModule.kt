@@ -3,6 +3,8 @@ package com.medical.buganddrug.AppModule
 import com.medical.buganddrug.data.local.LocalDataDao
 import com.medical.buganddrug.data.local.LocalDatabase
 import com.medical.buganddrug.data.local.getDatabaseBuilder
+import com.medical.buganddrug.data.remote.IosNetworkConnectivityChecker
+import com.medical.buganddrug.data.remote.NetworkConnectivityChecker
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -14,5 +16,8 @@ actual val platformModule: Module = module {
     }
     single<LocalDataDao> {
         get<LocalDatabase>().localDataDao()
+    }
+    single<NetworkConnectivityChecker> {
+        IosNetworkConnectivityChecker()
     }
 }

@@ -141,19 +141,29 @@ fun EtiologicalAgentScreen(
                                             .padding(12.dp)
                                     ) {
                                         Icon(
-                    painter = painterResource(Res.drawable.first_aid_kit),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                    modifier = Modifier.size(48.dp)
-                )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text = "Organism Details: ${selectedIsolation.type}",
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            painter = painterResource(Res.drawable.first_aid_kit),
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                            modifier = Modifier.size(44.dp)
                                         )
+                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Column {
+                                            Text(
+                                                text = selectedIsolation.organism ?: "Organism Details",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 18.sp
+                                                ),
+                                                color = Color(0xFF6A1B9A)
+                                            )
+                                            if (!selectedIsolation.type.isNullOrBlank()) {
+                                                Text(
+                                                    text = "Type: ${selectedIsolation.type}",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
                                     }
 
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -244,6 +254,7 @@ private fun IsolationDetailCard(option: EtilogicalAgent?) {
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            InfoRow("Organism", option?.organism ?: "N/A")
             InfoRow("Type", option?.type ?: "N/A")
             InfoRow("Infections Caused", option?.infectionsCaused ?: "N/A")
             InfoRow("First-line Treatment", option?.firstlineTreatment ?: "N/A")

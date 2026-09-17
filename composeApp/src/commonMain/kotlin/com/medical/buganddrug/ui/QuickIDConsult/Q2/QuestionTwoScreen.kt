@@ -58,19 +58,12 @@ fun QuestionTwoScreen(
     LaunchedEffect(Unit) { viewModel.getQ2Data() }
 
     // State
-    var selectedSymptomIds by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedLocalizationId by remember { mutableStateOf<Int?>(null) }
     var selectedLevel1Id by remember { mutableStateOf<Int?>(null) }
     var selectedLevel2Id by remember { mutableStateOf<Int?>(null) }
     var noOfDays by remember { mutableStateOf<String>("") }
-    var matchedDiseases by remember { mutableStateOf<List<DiseaseIdenticifationlistsX>>(emptyList()) }
-    var selectedItemsJsonArray by remember {
-        mutableStateOf<JsonArray>(buildJsonArray { })
-    }
-    var showCard by remember { mutableStateOf(false) }
-    var symptomExtraInputs by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     val indWindingData by viewModel.indWindingData.collectAsState()
-    var isFever by remember { mutableStateOf(true) } // true = Fever (0), false = Not Fever (1)
+    var isFever by remember { mutableStateOf(true) } // true = Fever (1), false = Not Fever (0)
     val feverId = if (isFever) 1 else 0
     // Response data
     val response = viewModel.getSyndromeIdentificationData?.diseaseIdenticifationlists
@@ -133,6 +126,11 @@ fun QuestionTwoScreen(
         } ?: emptyList()
     }
 
+    val isLastStageSelected = selectedLocalizationId != null &&
+            selectedLevel1Id != null &&
+            (level2Classifications.isEmpty() || selectedLevel2Id != null) &&
+            filteredDiseases.isNotEmpty()
+
     Scaffold(
         topBar = {
             topBar(
@@ -188,25 +186,21 @@ fun QuestionTwoScreen(
                                 checked = isFever,
                                 onCheckedChange = { isChecked ->
                                     isFever = isChecked
-                                    //
                                     selectedLocalizationId = null
                                     selectedLevel1Id = null
                                     selectedLevel2Id = null
-                                    matchedDiseases = emptyList()
-                                    noOfDays=""
+                                    noOfDays = ""
                                 }
                             )
                         }
                         OutlinedTextField(
-
                             value = noOfDays,
                             onValueChange = {
                                 noOfDays = it
                                 selectedLocalizationId = null
                                 selectedLevel1Id = null
                                 selectedLevel2Id = null
-                                matchedDiseases = emptyList()
-                                            },
+                            },
                             label = { Text("Duration of illness in days") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true,
@@ -243,18 +237,16 @@ fun QuestionTwoScreen(
 //                            }
 //                        )
 
-                        if (noOfDays!!.isNotEmpty() && localizations.isNotEmpty()) {
+                        if (noOfDays.isNotEmpty() && localizations.isNotEmpty()) {
                             SingleSelectSearchableSpinnerDialog(
                                 label = "Localization",
                                 items = localizations,
-                                itemLabel = { it.first!! },
+                                itemLabel = { it.first ?: "" },
                                 selectedItem = selectedLocalizationId,
                                 onItemSelected = {
                                     selectedLocalizationId = it?.second
                                     selectedLevel1Id = null
                                     selectedLevel2Id = null
-                                    matchedDiseases = emptyList()
-                                    showCard = false
                                 }
                             )
                         }
@@ -263,13 +255,11 @@ fun QuestionTwoScreen(
                             SingleSelectSearchableSpinnerDialog(
                                 label = "Level 1 Classification",
                                 items = level1Classifications,
-                                itemLabel = { it.first!! },
+                                itemLabel = { it.first ?: "" },
                                 selectedItem = selectedLevel1Id,
                                 onItemSelected = {
                                     selectedLevel1Id = it?.second
                                     selectedLevel2Id = null
-                                    matchedDiseases = emptyList()
-                                    showCard = false
                                 }
                             )
                         }
@@ -278,12 +268,10 @@ fun QuestionTwoScreen(
                             SingleSelectSearchableSpinnerDialog(
                                 label = "Level 2 Classification",
                                 items = level2Classifications,
-                                itemLabel = { it.first!! },
+                                itemLabel = { it.first ?: "" },
                                 selectedItem = selectedLevel2Id,
                                 onItemSelected = {
                                     selectedLevel2Id = it?.second
-                                    matchedDiseases = emptyList()
-                                    showCard = false
                                 }
                             )
                         }
@@ -291,7 +279,7 @@ fun QuestionTwoScreen(
                 }
 
                 // ========== Disease Report Card ==========
-                if (showCard && matchedDiseases.isNotEmpty()) {
+                if (isLastStageSelected) {
                     ElevatedCard(
                         modifier = Modifier.fillMaxWidth(),
                         elevation = CardDefaults.elevatedCardElevation(4.dp),
@@ -314,7 +302,8 @@ fun QuestionTwoScreen(
                                 Icon(
                                     painter = painterResource(Res.drawable.reportissue),
                                     contentDescription = "Report Icon",
-                                    tint = Color(0xFF800080)
+                                    tint = Color(0xFF800080),
+                                    modifier = Modifier.size(48.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
@@ -345,7 +334,7 @@ fun QuestionTwoScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            val groupedDiseases = matchedDiseases.groupBy { it.diseaseId }
+                            val groupedDiseases = filteredDiseases.groupBy { it.diseaseId }
 
                             Text(
                                 text = "Suggested Diseases and Recommended Tests",
@@ -390,7 +379,7 @@ fun QuestionTwoScreen(
                                                 ) {
                                                     // Disease Name
                                                     com.medical.buganddrug.util.ClickableDiseaseText(
-                                                        text = diseaseName!!,
+                                                        text = diseaseName ?: "",
                                                         style = MaterialTheme.typography.bodyMedium.copy(
                                                             fontWeight = FontWeight.Medium
                                                         )
@@ -404,7 +393,7 @@ fun QuestionTwoScreen(
                                                         style = MaterialTheme.typography.bodyMedium
                                                     )
 
-                                                    Divider(
+                                                    HorizontalDivider(
                                                         color = MaterialTheme.colorScheme.outlineVariant,
                                                         thickness = 0.5.dp,
                                                         modifier = Modifier.padding(top = 6.dp)
@@ -426,47 +415,6 @@ fun QuestionTwoScreen(
                         }
                     }
                 }
-
-                // ========== Submit Button ==========
-                Button(
-                    onClick = {
-                        matchedDiseases = filteredDiseases
-                        selectedItemsJsonArray = buildJsonArray {
-                            matchedDiseases.forEach { data ->
-                                add(
-                                    buildJsonObject {
-                                        put("symptomId", data.symptomId)
-                                        put("localizationId", data.localizationId)
-                                        put("level1classificationId", data.level1classificationId)
-                                        put("level2classificationId", data.level2classificationId)
-                                        put("disease", data.disease)
-                                        put("testName", data.testName)
-                                        put("noOfDays", symptomExtraInputs[data.symptomId] ?: "0")
-                                    }
-                                )
-                            }
-                        }
-                        showCard = true
-                        println("👉 Selected Items: $selectedItemsJsonArray")
-                        onSubmit()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(55.dp)
-                        .clip(RoundedCornerShape(16.dp)),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.White
-                    ),
-                    enabled =
-                       // selectedSymptomIds.isNotEmpty() &&
-                            selectedLocalizationId != null &&
-                            selectedLevel1Id != null &&
-                            (level2Classifications.isEmpty() || selectedLevel2Id != null) &&
-                            filteredDiseases.isNotEmpty()
-                ) {
-                    Text("Submit", style = MaterialTheme.typography.titleMedium)
-                }
             }
 
             if (isLoading) LoadingOverlay()
@@ -478,169 +426,7 @@ fun QuestionTwoScreen(
 }
 
 
-@Composable
-fun <T> MultiSelectInputSearchableSpinnerDialog(
-    label: String,
-    items: List<T>,
-    itemId: (T) -> String,
-    itemLabel: (T) -> String,
-    selectedIds: List<String>,
-    onSelectionChanged: (selected: List<String>, selectedLabels: List<String>, extraInputs: Map<String, String>) -> Unit
-) {
-    var showDialog by remember { mutableStateOf(false) }
-    var selectedItems by remember { mutableStateOf(items.filter { itemId(it) in selectedIds }) }
-    var extraInputs by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable { showDialog = true }
-    ) {
-        OutlinedTextField(
-            value = selectedItems.joinToString(", ") { itemLabel(it) },
-            onValueChange = {},
-            label = { Text(label) },
-            readOnly = true,
-            enabled = false,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            shape = MaterialTheme.shapes.small,
-            trailingIcon = {
-                IconButton(onClick = { showDialog = true }) {
-                    Icon(painter = painterResource(Res.drawable.arrow_drop_down), contentDescription = "Select",            modifier = Modifier.size(24.dp) // actual icon size
-                    )
-                }
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                disabledTextColor = LocalContentColor.current.copy(alpha = 1f),
-                disabledLabelColor = LocalContentColor.current.copy(alpha = 1f),
-                disabledTrailingIconColor = LocalContentColor.current.copy(alpha = 1f),
-                disabledBorderColor = MaterialTheme.colorScheme.outline,
-                disabledContainerColor = Color.White
-            )
-        )
-    }
-
-    if (showDialog) {
-        Dialog(onDismissRequest = { showDialog = false }) {
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                tonalElevation = 8.dp,
-                color = Color.White,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                    .background(Color.White) // 👈 Ensure inside is also white
-                        .padding(16.dp),
-
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    var searchQuery by remember { mutableStateOf("") }
-
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        label = { Text("Search $label") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        shape = MaterialTheme.shapes.medium                    )
-
-                    val filteredItems = if (searchQuery.isEmpty()) items
-                    else items.filter { itemLabel(it).contains(searchQuery, ignoreCase = true) }
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 200.dp)
-                    ) {
-                        items(filteredItems) { item ->
-                            val isSelected = selectedItems.any { itemId(it) == itemId(item) }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = isSelected,
-                                    onCheckedChange = { checked ->
-                                        val id = itemId(item)
-                                        selectedItems = if (checked) {
-                                            selectedItems + item
-                                        } else {
-                                            selectedItems.filter { itemId(it) != id }
-                                        }
-
-                                        // Update extraInputs properly (remove entry if unchecked)
-                                        extraInputs = if (!checked) {
-                                            extraInputs.toMutableMap().apply { remove(id) }
-                                        } else {
-                                            extraInputs
-                                        }
-                                    }
-                                )
-                                Text(
-                                    text = itemLabel(item),
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        selectedItems.forEach { item ->
-                            val id = itemId(item)
-                            val labelText = itemLabel(item)
-                            if (!extraInputs.containsKey(id)) {
-                                extraInputs = extraInputs.toMutableMap().apply {
-                                    this[id] = "1"
-                                }
-                            }
-                            OutlinedTextField(
-                                value = extraInputs[id] ?: "1",
-                                onValueChange = { newValue ->
-                                    extraInputs = extraInputs.toMutableMap().apply {
-                                        this[id] = newValue
-                                    }
-                                },
-                                label = { Text("No of days with $labelText") },
-                                modifier = Modifier.fillMaxWidth(),
-                                keyboardOptions = KeyboardOptions.Default.copy(
-                                    keyboardType = KeyboardType.Number
-                                ),
-                                maxLines = 1,
-                                singleLine = true
-                            )
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(onClick = { showDialog = false }) { Text("Cancel") }
-                        Spacer(Modifier.width(8.dp))
-                        Button(
-                            onClick = {
-                                onSelectionChanged(
-                                    selectedItems.map(itemId),
-                                    selectedItems.map(itemLabel),
-                                    extraInputs.toMap()
-                                )
-                                showDialog = false
-                            }
-                        ) { Text("OK") }
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun <T> SingleSelectSearchableSpinnerDialog(

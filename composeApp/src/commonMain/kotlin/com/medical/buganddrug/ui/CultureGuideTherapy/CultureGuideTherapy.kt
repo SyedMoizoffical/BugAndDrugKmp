@@ -70,7 +70,6 @@ fun CultureGuideTherapyScreen(
     var selectedOrganism by remember { mutableStateOf<String?>(null) }
 
     var selectedValues by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-    var finalResults by remember { mutableStateOf<List<SelectedAntibiotic>>(emptyList()) }
 
     // ---------- DUMMY DATA ----------
 
@@ -87,15 +86,29 @@ fun CultureGuideTherapyScreen(
         viewModel.getCultureGuideData()
     }
 
-    val specimenList = cultureGuideList.map { it.diagnosis }.distinct()
-    val infectionList = cultureGuideList.filter { it.diagnosis == selectedSpecimen }.map { it.sample }.distinct()
+    val specimenList = cultureGuideList.mapNotNull { it.diagnosis }.distinct()
+    val infectionList = cultureGuideList.filter { it.diagnosis == selectedSpecimen }.mapNotNull { it.sample }.distinct()
     val organismList =
         cultureGuideList.filter { it.diagnosis == selectedSpecimen && it.sample == selectedInfection }
-            .map { it.organism }.distinct()
+            .mapNotNull { it.organism }.distinct()
     val antibioticList = cultureGuideList.filter {
         it.diagnosis == selectedSpecimen &&
                 it.sample == selectedInfection &&
                 it.organism == selectedOrganism
+    }
+
+    val allAntibioticsSelected = antibioticList.isNotEmpty() &&
+            antibioticList.all { it.antibiotic != null && selectedValues.containsKey(it.antibiotic) }
+
+    val finalResults = remember(selectedValues, antibioticList, allAntibioticsSelected) {
+        if (allAntibioticsSelected) {
+            antibioticList
+                .filter { selectedValues[it.antibiotic] == "S" }
+                .sortedBy { it.duration }
+                .map { SelectedAntibiotic(it.antibiotic ?: "", "S") }
+        } else {
+            emptyList()
+        }
     }
 
     Scaffold(
@@ -144,21 +157,18 @@ fun CultureGuideTherapyScreen(
 
                 // --- SPECIMEN ---
                 item {
-
-                        SingleSelectSearchableSpinnerDialog(
-                            label = "Select Specimen",
-                            items = specimenList.map { it!! to it },
-                            itemLabel = { it.first },
-                            selectedItem = selectedSpecimen,
-                            onItemSelected = {
-                                selectedSpecimen = it?.second
-                                selectedInfection = null
-                                selectedOrganism = null
-                                selectedValues = emptyMap()
-                                finalResults = emptyList()
-                            }
-                        )
-
+                    SingleSelectSearchableSpinnerDialog(
+                        label = "Select Specimen",
+                        items = specimenList.map { it to it },
+                        itemLabel = { it.first },
+                        selectedItem = selectedSpecimen,
+                        onItemSelected = {
+                            selectedSpecimen = it?.second
+                            selectedInfection = null
+                            selectedOrganism = null
+                            selectedValues = emptyMap()
+                        }
+                    )
                 }
 
                 if (selectedSpecimen != null) {
@@ -174,19 +184,17 @@ fun CultureGuideTherapyScreen(
 
                     // --- INFECTION ---
                     item {
-                            SingleSelectSearchableSpinnerDialog(
-                                label = "Select Infection",
-                                items = infectionList.map { it!! to it },
-                                itemLabel = { it.first },
-                                selectedItem = selectedInfection,
-                                onItemSelected = {
-                                    selectedInfection = it?.second
-                                    selectedOrganism = null
-                                    selectedValues = emptyMap()
-                                    finalResults = emptyList()
-                                }
-                            )
-
+                        SingleSelectSearchableSpinnerDialog(
+                            label = "Select Infection",
+                            items = infectionList.map { it to it },
+                            itemLabel = { it.first },
+                            selectedItem = selectedInfection,
+                            onItemSelected = {
+                                selectedInfection = it?.second
+                                selectedOrganism = null
+                                selectedValues = emptyMap()
+                            }
+                        )
                     }
                 }
 
@@ -203,18 +211,16 @@ fun CultureGuideTherapyScreen(
 
                     // --- ORGANISM ---
                     item {
-                            SingleSelectSearchableSpinnerDialog(
-                                label = "Select Organism",
-                                items = organismList.map { it!! to it },
-                                itemLabel = { it.first },
-                                selectedItem = selectedOrganism,
-                                onItemSelected = {
-                                    selectedOrganism = it?.second
-                                    selectedValues = emptyMap()
-                                    finalResults = emptyList()
-                                }
-                            )
-
+                        SingleSelectSearchableSpinnerDialog(
+                            label = "Select Organism",
+                            items = organismList.map { it to it },
+                            itemLabel = { it.first },
+                            selectedItem = selectedOrganism,
+                            onItemSelected = {
+                                selectedOrganism = it?.second
+                                selectedValues = emptyMap()
+                            }
+                        )
                     }
                 }
 
@@ -252,37 +258,42 @@ fun CultureGuideTherapyScreen(
                 //                           SELECTED TABLE
                 // ===================================================================
 
-                if (finalResults.isNotEmpty()) {
-                    item {
-                        SelectedAntibioticTable(finalResults, antibioticList)
-                    }
-                }
-
-                // ===================================================================
-                //                           SUBMIT BUTTON
-                // ===================================================================
-
-                if (selectedOrganism != null) {
-                    item {
-                        Button(
-                            onClick = {
-                                val selectedSensitive = antibioticList
-                                    .filter { selectedValues[it.antibiotic] == "S" }
-                                    .sortedBy { it.duration }
-                                    .map { SelectedAntibiotic(it.antibiotic!!, "S") }
-
-                                finalResults = selectedSensitive
-                                onSubmit()
-                            },
-                            enabled = selectedValues.isNotEmpty(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp),
-                            shape = RoundedCornerShape(14.dp)
-                        ) {
-                            Text("Submit", fontWeight = FontWeight.Bold)
+                if (allAntibioticsSelected) {
+                    if (finalResults.isNotEmpty()) {
+                        item {
+                            SelectedAntibioticTable(finalResults, antibioticList)
                         }
-                        Spacer(Modifier.height(12.dp))
+                    } else {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 16.dp, bottom = 16.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                shape = RoundedCornerShape(16.dp),
+                                elevation = CardDefaults.cardElevation(4.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "No Sensitive Options Found",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFB91C1C)
+                                        )
+                                    )
+                                    Spacer(Modifier.height(6.dp))
+                                    Text(
+                                        text = "All recommended antibiotics were marked as Resistant (R). Please consult an Infectious Disease (ID) specialist.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Center,
+                                        color = Color(0xFF64748B)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

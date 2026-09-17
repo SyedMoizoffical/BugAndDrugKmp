@@ -11,6 +11,8 @@ import com.medical.buganddrug.data.model.QoestionsModel.Q2Model.QuestionTwoRespo
 import com.medical.buganddrug.data.remote.SharedPreferenceManager
 import com.medical.buganddrug.data.repository.QuestionsRepository
 import com.medical.buganddrug.data.model.LocalStorageDatamodel.DiseaseItem
+import com.medical.buganddrug.util.NetworkErrorHandler
+import com.medical.buganddrug.util.toUserFriendlyMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,21 +53,21 @@ class AuthViewModel (
 
             result.fold(
                 onSuccess = { exists ->
-                    if(exists.statusCode==0){
+                    if (exists.statusCode == 0) {
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
-                            error = exists.msg ?: "Sign-up failed"
+                            error = NetworkErrorHandler.sanitizeMessage(exists.msg ?: "Sign in failed")
                         )
-                    }else{
+                    } else {
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
                             isExistingUser = true
                         )
                         try {
-                            sharedPrefs.saveToken(exists.data !!.token)
+                            sharedPrefs.saveToken(exists.data!!.token)
                             sharedPrefs.saveEmail(email)
                             getAllLocalData()
-                        }catch (_:Exception){
+                        } catch (_: Exception) {
 
                         }
                     }
@@ -74,7 +76,7 @@ class AuthViewModel (
                 onFailure = { throwable ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = throwable.message ?: "Network error"
+                        error = throwable.toUserFriendlyMessage()
                     )
                 }
             )
@@ -94,13 +96,13 @@ class AuthViewModel (
             )
 
             result.fold(
-                onSuccess = {exists ->
-                    if(exists.statusCode==0){
+                onSuccess = { exists ->
+                    if (exists.statusCode == 0) {
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
-                            error = exists.msg ?: "Sign-up failed"
+                            error = NetworkErrorHandler.sanitizeMessage(exists.msg ?: "Sign-up failed")
                         )
-                }else{
+                    } else {
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
                             isExistingUser = true
@@ -109,19 +111,15 @@ class AuthViewModel (
                             sharedPrefs.saveToken(exists.data!!.token)
                             sharedPrefs.saveEmail(email)
                             getAllLocalData()
-
-
-                        }catch (_:Exception){
+                        } catch (_: Exception) {
 
                         }
-                }
-
-
+                    }
                 },
                 onFailure = { throwable ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = throwable.message ?: "Sign-up failed"
+                        error = throwable.toUserFriendlyMessage()
                     )
                 }
             )
@@ -147,7 +145,7 @@ class AuthViewModel (
                 printExtractedDiseaseList()
             }.onFailure { throwable ->
                 _loading.value = false
-                _errorMessage.value = throwable.message
+                _errorMessage.value = throwable.toUserFriendlyMessage()
             }
         }
     }

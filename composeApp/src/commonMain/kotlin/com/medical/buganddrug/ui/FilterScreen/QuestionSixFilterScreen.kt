@@ -56,19 +56,37 @@ fun QuestionSixFilterScreen(
             var matched: AntibioticDose? = null
 
             if (!nameToMatch.isNullOrBlank()) {
+                // 1. Exact match by name (case-insensitive)
                 matched = viewModel.antibioticDoses.find { data ->
-                    val name = data.antibioticName?.trim() ?: ""
-                    name.equals(nameToMatch, ignoreCase = true) ||
-                    name.replace("-", " ").equals(nameToMatch.replace("-", " "), ignoreCase = true) ||
-                    name.replace("/", " ").equals(nameToMatch.replace("/", " "), ignoreCase = true) ||
-                    name.contains(nameToMatch, ignoreCase = true) ||
-                    nameToMatch.contains(name, ignoreCase = true)
+                    data.antibioticName?.trim().equals(nameToMatch, ignoreCase = true)
+                }
+
+                // 2. Normalized hyphen and slashes exact match
+                if (matched == null) {
+                    val normalizedQuery = nameToMatch.replace("-", " ").replace("/", " ").replace("\\s+".toRegex(), " ").trim()
+                    matched = viewModel.antibioticDoses.find { data ->
+                        val normalizedName = data.antibioticName?.replace("-", " ")?.replace("/", " ")?.replace("\\s+".toRegex(), " ")?.trim() ?: ""
+                        normalizedName.equals(normalizedQuery, ignoreCase = true)
+                    }
                 }
             }
 
+            // 3. Match by ID if name wasn't found or wasn't provided
             if (matched == null && antibioticId != null && antibioticId != 0) {
                 matched = viewModel.antibioticDoses.find { data ->
-                    data.antibioticId == antibioticId
+                    data.antibioticId == antibioticId || data.id == antibioticId
+                }
+            }
+
+            // 4. Fallback: prefix match and then substring match
+            if (matched == null && !nameToMatch.isNullOrBlank()) {
+                val lowerQuery = nameToMatch.lowercase()
+                matched = viewModel.antibioticDoses.find { data ->
+                    val n = data.antibioticName?.trim()?.lowercase() ?: ""
+                    n.isNotBlank() && (n.startsWith(lowerQuery) || lowerQuery.startsWith(n))
+                } ?: viewModel.antibioticDoses.find { data ->
+                    val n = data.antibioticName?.trim()?.lowercase() ?: ""
+                    n.isNotBlank() && (n.contains(lowerQuery) || lowerQuery.contains(n))
                 }
             }
 

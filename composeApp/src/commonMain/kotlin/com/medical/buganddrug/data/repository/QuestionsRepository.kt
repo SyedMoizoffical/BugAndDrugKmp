@@ -20,218 +20,136 @@ import com.medical.buganddrug.data.remote.ApiService
 import com.medical.buganddrug.ui.onboarding.loginScreen.SignUpResponseDataModel
 import com.medical.buganddrug.data.local.*
 import com.medical.buganddrug.data.model.LocalStorageDatamodel.*
+import com.medical.buganddrug.data.remote.NetworkConnectivityChecker
+import com.medical.buganddrug.util.NetworkErrorHandler
+import com.medical.buganddrug.util.toUserFriendlyMessage
 
 class QuestionsRepository (
-
     private val api: ApiService,
-    private val localDao: LocalDataDao
+    private val localDao: LocalDataDao,
+    private val networkChecker: NetworkConnectivityChecker? = null
 ) {
-    suspend fun getUser(): Result<Data?> {
-        return try {
-            val response = api.getUser()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    private suspend fun <T> safeApiCall(call: suspend () -> ApiResponse<T>): Result<T?> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
         }
-    }
-//Question One
-    suspend fun submitQ1QSofa(q1QSofaRequestModel: Q1QSofaRequestModel): Result<QsofaNewsResponse?> {
         return try {
-            val response = api.submitQ1QSofa(q1QSofaRequestModel)
-            if (response.statusCode == 200) {
+            val response = call()
+            if (response.statusCode == 200 || response.success) {
                 Result.success(response.data)
+            } else if (response.statusCode == 401) {
+                Result.failure(Exception(NetworkErrorHandler.SESSION_EXPIRED_MESSAGE))
             } else {
-                Result.failure(Exception(response.statusMessage))
+                val errorMsg = NetworkErrorHandler.sanitizeMessage(response.statusMessage ?: response.msg ?: "Request failed")
+                Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    suspend fun submitQ1News2(q1QSofaRequestModel: NewsPostRequest): Result<QsofaNewsResponse?> {
-        return try {
-            val response = api.submitQ1News2(q1QSofaRequestModel)
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(e.toUserFriendlyMessage()))
         }
     }
 
-    //Question Two
-    suspend fun getQ2Data(): Result<QuestionTwoResponseModel?> {
-        return try {
-            val response = api.getQ2Data()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }   //Question Two
-    suspend fun getClinicalSyndromeData(): Result<ClinicalSyndromeResponseModel?> {
-        return try {
-            val response = api.getClinicalSyndromeData()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    suspend fun getUser(): Result<Data?> = safeApiCall { api.getUser() }
 
-    //Question Three
-    suspend fun getQ3Data(): Result<GetIVtoPOsData?> {
-        return try {
-            val response = api.getIVtoPOsData()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    //Question Four
-    suspend fun getQ4Data(): Result<GetPrecautionFinderList?> {
-        return try {
+    // Question One
+    suspend fun submitQ1QSofa(q1QSofaRequestModel: Q1QSofaRequestModel): Result<QsofaNewsResponse?> =
+        safeApiCall { api.submitQ1QSofa(q1QSofaRequestModel) }
 
-            val response = api.getPrecautionFinderList()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    //Question Five
-    suspend fun getQ5Data(): Result<Q5Response?> {
-        return try {
-            val response = api.getCreatinineClearance()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }    //Question six
-    suspend fun getAntibiotic(): Result<Q5Response?> {
-        return try {
-            val response = api.getAntibiotic()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    //Question Eight
-    suspend fun getQ8Data(): Result<GetAntibioticGeneListResponse?> {
-        return try {
-            val response = api.getAntibioticGeneList()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    //Question Four
-    suspend fun getExposureProPhylaxisModel(): Result<ExposureProPhylaxisModel?> {
-        return try {
-            val response = api.getExposureProPhylaxisModelData()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    //Question Two
-    suspend fun getAntimicrobialSpectrumData(): Result<AntimicrobialSpectrumModel?> {
-        return try {
-            val response = api.getAntimicrobialSpectrumData()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    suspend fun submitQ1News2(q1QSofaRequestModel: NewsPostRequest): Result<QsofaNewsResponse?> =
+        safeApiCall { api.submitQ1News2(q1QSofaRequestModel) }
 
-    suspend fun getAntibioticForSurvey(): Result<Q5Response?> {
-        return try {
-            val response = api.getAntibiotic()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    // Question Two
+    suspend fun getQ2Data(): Result<QuestionTwoResponseModel?> =
+        safeApiCall { api.getQ2Data() }
+
+    suspend fun getClinicalSyndromeData(): Result<ClinicalSyndromeResponseModel?> =
+        safeApiCall { api.getClinicalSyndromeData() }
+
+    // Question Three
+    suspend fun getQ3Data(): Result<GetIVtoPOsData?> =
+        safeApiCall { api.getIVtoPOsData() }
+
+    // Question Four
+    suspend fun getQ4Data(): Result<GetPrecautionFinderList?> =
+        safeApiCall { api.getPrecautionFinderList() }
+
+    // Question Five
+    suspend fun getQ5Data(): Result<Q5Response?> =
+        safeApiCall { api.getCreatinineClearance() }
+
+    // Question Six
+    suspend fun getAntibiotic(): Result<Q5Response?> =
+        safeApiCall { api.getAntibiotic() }
+
+    // Question Eight
+    suspend fun getQ8Data(): Result<GetAntibioticGeneListResponse?> =
+        safeApiCall { api.getAntibioticGeneList() }
+
+    // Exposure
+    suspend fun getExposureProPhylaxisModel(): Result<ExposureProPhylaxisModel?> =
+        safeApiCall { api.getExposureProPhylaxisModelData() }
+
+    // Antimicrobial
+    suspend fun getAntimicrobialSpectrumData(): Result<AntimicrobialSpectrumModel?> =
+        safeApiCall { api.getAntimicrobialSpectrumData() }
+
+    suspend fun getAntibioticForSurvey(): Result<Q5Response?> =
+        safeApiCall { api.getAntibiotic() }
+
     suspend fun submitSurvey(request: AppSurveyPostRequest): Result<ApiResponse<Unit>> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
         return try {
             val response = api.postAppSurvey(request)
-            if (response.statusCode == 200) {
+            if (response.statusCode == 200 || response.success) {
                 Result.success(response)
+            } else if (response.statusCode == 401) {
+                Result.failure(Exception(NetworkErrorHandler.SESSION_EXPIRED_MESSAGE))
             } else {
-                Result.failure(Exception(response.statusMessage))
+                val errorMsg = NetworkErrorHandler.sanitizeMessage(response.statusMessage ?: response.msg ?: "Request failed")
+                Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(e.toUserFriendlyMessage()))
         }
-
     }
+
     suspend fun fetchCenters(): Result<List<HivArtCenter>> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
         return try {
             val response = api.getHivArtCenters()
-            if (response.statusCode == 200) {
-                Result.success(response.data!!.hivArtCenters)
+            if (response.statusCode == 200 || response.success) {
+                Result.success(response.data?.hivArtCenters ?: emptyList())
+            } else if (response.statusCode == 401) {
+                Result.failure(Exception(NetworkErrorHandler.SESSION_EXPIRED_MESSAGE))
             } else {
-                Result.failure(Exception(response.statusMessage))
+                val errorMsg = NetworkErrorHandler.sanitizeMessage(response.statusMessage ?: response.msg ?: "Request failed")
+                Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(e.toUserFriendlyMessage()))
         }
     }
 
-//login
-suspend fun checkEmailExists(email: String): Result<ApiResponse<SignUpResponseDataModel>> {
-    return try {
-        val response = api.checkEmail(email) // GET SignIn?email=...
-        Result.success(response)
-        // Adjust according to your actual response model
-    } catch (e: Exception) {
-        Result.failure(e)
+    // Login
+    suspend fun checkEmailExists(email: String): Result<ApiResponse<SignUpResponseDataModel>> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
+        return try {
+            val response = api.checkEmail(email)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(Exception(e.toUserFriendlyMessage()))
+        }
     }
-}
 
     suspend fun signUp(name: String, email: String, password: String, pmdc: String): Result<ApiResponse<SignUpResponseDataModel>> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
         return try {
             val response = api.signUp(
                 mapOf(
@@ -241,46 +159,32 @@ suspend fun checkEmailExists(email: String): Result<ApiResponse<SignUpResponseDa
                     "pmdc"     to pmdc
                 )
             )
-            if (response.statusCode == 200) {
+            if (response.statusCode == 200 || response.success) {
                 Result.success(response)
+            } else if (response.statusCode == 401) {
+                Result.failure(Exception(NetworkErrorHandler.SESSION_EXPIRED_MESSAGE))
             } else {
-                Result.failure(Exception(response.msg ?: "Sign up failed with status ${response.statusCode}"))
+                val errorMsg = NetworkErrorHandler.sanitizeMessage(response.msg ?: response.statusMessage ?: "Sign up failed")
+                Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(e.toUserFriendlyMessage()))
         }
     }
-    //Question Two
-    suspend fun getCultureGuideApi(): Result<CultureTherapyGuideModel?> {
-        return try {
-            val response = api.getCultureGuideApi()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    //Question Four
-    suspend fun getEtiologicalAgent(): Result<QuestionTwoResponseModel?> {
-        return try {
-            val response = api.getEtiologicalAgent()
-            if (response.statusCode == 200) {
-                Result.success(response.data)
-            } else {
-                Result.failure(Exception(response.statusMessage))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    //Question Four
+
+    suspend fun getCultureGuideApi(): Result<CultureTherapyGuideModel?> =
+        safeApiCall { api.getCultureGuideApi() }
+
+    suspend fun getEtiologicalAgent(): Result<QuestionTwoResponseModel?> =
+        safeApiCall { api.getEtiologicalAgent() }
+
     suspend fun getAllLocalData(): Result<LocalDataModel?> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
         return try {
             val response = api.getAllDataForLocal()
-            if (response.statusCode == 200) {
+            if (response.statusCode == 200 || response.success) {
                 val localData = response.data
                 if (localData != null) {
                     localDao.insertLovs(
@@ -373,11 +277,14 @@ suspend fun checkEmailExists(email: String): Result<ApiResponse<SignUpResponseDa
                     }
                 }
                 Result.success(response.data)
+            } else if (response.statusCode == 401) {
+                Result.failure(Exception(NetworkErrorHandler.SESSION_EXPIRED_MESSAGE))
             } else {
-                Result.failure(Exception(response.statusMessage))
+                val errorMsg = NetworkErrorHandler.sanitizeMessage(response.statusMessage ?: response.msg ?: "Request failed")
+                Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(e.toUserFriendlyMessage()))
         }
     }
 
@@ -461,6 +368,22 @@ suspend fun checkEmailExists(email: String): Result<ApiResponse<SignUpResponseDa
     }
 
     suspend fun hasLocalData(): Boolean = localDao.getLovs() != null
+ 
+    suspend fun clearLocalData() {
+        localDao.clearLovs()
+        localDao.clearSyndromeIdentificationDataQ2()
+        localDao.clearSyndromeIdentificationData()
+        localDao.clearIvToPOs()
+        localDao.clearPrecautionFinderList()
+        localDao.clearCreatinineClearance()
+        localDao.clearAntibioticGeneList()
+        localDao.clearExposureProPhylaxisList()
+        localDao.clearBacteriaSusceptibilityList()
+        localDao.clearHivArtCenterList()
+        localDao.clearCultureTherapyGuideList()
+        localDao.clearQSofaScoringPossibilities()
+        localDao.clearNews2ScoringPossibilities()
+    }
 
     suspend fun getLocalCultureTherapyGuideList(): CultureTherapyGuideList? = localDao.getCultureTherapyGuideList()?.let {
         CultureTherapyGuideList(
@@ -496,8 +419,10 @@ suspend fun checkEmailExists(email: String): Result<ApiResponse<SignUpResponseDa
         devicesDetail: String,
         images: List<ByteArray>
     ): Result<Int?> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
         return try {
-
             val response = api.postBugReport(
                 description,
                 email,
@@ -505,11 +430,9 @@ suspend fun checkEmailExists(email: String): Result<ApiResponse<SignUpResponseDa
                 devicesDetail,
                 images
             )
-
             Result.success(response.statusCode)
-
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(e.toUserFriendlyMessage()))
         }
     }
 }

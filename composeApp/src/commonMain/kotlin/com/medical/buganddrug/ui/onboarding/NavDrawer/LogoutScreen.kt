@@ -22,13 +22,18 @@ import com.medical.buganddrug.ui.onboarding.GradientButton
 import com.medical.buganddrug.ui.onboarding.LogoutScreen.LogoutViewModel
 import com.medical.buganddrug.ui.onboarding.NavDrawer.bugReportScreen.BugReportViewModel
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogoutScreen(
     viewModel: LogoutViewModel,
     onBackClick: () -> Unit,
-    onConfirmLogout: () -> Unit   // Call your logout logic here (clear session, navigate to login, etc.)
+    onConfirmLogout: () -> Unit
 ) {
+    val isLoading by viewModel.loading.collectAsState()
+
     Scaffold(
         topBar = {
             topBar(
@@ -37,110 +42,121 @@ fun LogoutScreen(
                 onBackClick = onBackClick
             )
         }
-
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Warning icon (optional – red circle with !)
-            Box(
+            Column(
                 modifier = Modifier
-                    .size(80.dp)
-                    .background(Color(0xFFFFEBEE), shape = RoundedCornerShape(40.dp)),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = "!",
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFC62828)
-                )
-            }
+                Spacer(modifier = Modifier.height(32.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Are you sure you want to log out?",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Disclaimer / important note
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFFFF3E0)  // Light orange warning bg
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp)
+                // Warning icon
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .background(Color(0xFFFFEBEE), shape = RoundedCornerShape(40.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Important Notice",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFFEF6C00)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Logging out will end your current session. " +
-                               "Any unsaved data or in-progress entries may be lost. " +
-                               "This application is intended for licensed medical professionals only. " +
-                               "Ensure all clinical decisions are properly documented before ending your session.\n\n" +
-                               "You will need to sign in again to access patient-related features.",
-                        fontSize = 15.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        lineHeight = 24.sp
+                        text = "!",
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFC62828)
                     )
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Are you sure you want to log out?",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Disclaimer / important note
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFFFF3E0)  // Light orange warning bg
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Text(
+                            text = "Important Notice",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFFEF6C00)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Logging out will end your current session and remove stored data. " +
+                                   "This application is intended for licensed medical professionals only. " +
+                                   "Ensure all clinical decisions are properly documented before ending your session.\n\n" +
+                                   "You will need to sign in again to access patient-related features.",
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            lineHeight = 24.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                // Action buttons
+                GradientButton(
+                    text = if (isLoading) "Logging out..." else "Yes, Log Out",
+                    enabled = !isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    onClick = {
+                        viewModel.logout {
+                            onConfirmLogout()
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedButton(
+                    onClick = onBackClick,
+                    enabled = !isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "Cancel",
+                        fontSize = 16.sp,
+                        color = Color(0xFF800080)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(64.dp))
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
-
-            // Action buttons
-            GradientButton(
-                text = "Yes, Log Out",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                onClick = {
-                    viewModel.clearData()
-
-                    onConfirmLogout()
-                }
-            )
-
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedButton(
-                onClick = onBackClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Cancel",
-                    fontSize = 16.sp,
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
                     color = Color(0xFF800080)
                 )
             }
-
-            Spacer(modifier = Modifier.height(64.dp))
         }
     }
 }

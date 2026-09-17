@@ -157,7 +157,7 @@ object DiseaseExtractor {
         combined.addAll(extractFromSyndromeDataQ2(syndromeDataQ2))
         combined.addAll(extractAntibiotics(creatinineClearance?.antibioticDoses))
 
-        val result = combined.distinctBy { it.name.lowercase() }
+        val result = combined.distinctBy { "${it.type.lowercase()}_${it.name.trim().lowercase()}" }
         if (result.isNotEmpty()) {
             cachedDiseaseList = result
         }

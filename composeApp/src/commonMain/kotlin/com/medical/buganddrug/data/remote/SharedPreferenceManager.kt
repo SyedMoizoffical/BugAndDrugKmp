@@ -52,4 +52,12 @@ class SharedPreferenceManager(
     fun clearPatientData() {
         settings.remove("patientData")
     }
+
+    fun clearToken() {
+        settings.remove("patientToken")
+    }
+
+    fun clearAll() {
+        settings.clear()
+    }
 }

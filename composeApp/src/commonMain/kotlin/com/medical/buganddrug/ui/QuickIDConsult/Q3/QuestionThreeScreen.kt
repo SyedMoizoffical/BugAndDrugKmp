@@ -795,18 +795,18 @@ fun QuestionThreeScreen(
 
                     }
                     // Submit Button for Part 3
-                    Button(
-                        onClick = {
-                            onSubmit()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp),
-                        shape = MaterialTheme.shapes.medium,
-                        enabled = selectedConditionId != null
-                    ) {
-                        Text("Submit")
-                    }
+//                    Button(
+//                        onClick = {
+//                            onSubmit()
+//                        },
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(top = 12.dp),
+//                        shape = MaterialTheme.shapes.medium,
+//                        enabled = selectedConditionId != null
+//                    ) {
+//                        Text("Submit")
+//                    }
 
                 }
 

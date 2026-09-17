@@ -35,11 +35,11 @@ val appModule = module {
 
     // Repository
     single {
-        QuestionsRepository(get(), get())
+        QuestionsRepository(get(), get(), getOrNull())
     }
     // Repository
     single {
-        UserRepository(get())
+        UserRepository(get(), getOrNull())
     }
     // ViewModels
 // ViewModels
@@ -97,6 +97,7 @@ val appModule = module {
         repository = get(),
         sharedPrefs = get()) }
     factory { LogoutViewModel(
+        repository = get(),
         sharedPrefs = get()) }
     factory { HivArtCenterViewModel(
         repository = get()) }

@@ -49,28 +49,46 @@ fun EtiologicalAgentFilterScreen(
     val isLoading by viewModel.loading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
-    var selectedConditionId by remember(organismId) {
-        mutableStateOf<Int?>(if (organismId != null && organismId != 0) organismId else null)
+    var selectedConditionId by remember {
+        mutableStateOf<Int?>(null)
     }
 
     LaunchedEffect(response, organismId, organismName) {
-        if (selectedConditionId == null && response != null) {
+        if (response != null) {
             val isolations = response.etilogicalAgents
             var matched: com.medical.buganddrug.data.model.LocalStorageDatamodel.EtilogicalAgent? = null
 
             if (!organismName.isNullOrBlank()) {
                 val nameToMatch = organismName.trim()
+                // 1. Exact match
                 matched = isolations.find {
-                    val org = it.organism?.trim() ?: ""
-                    org.equals(nameToMatch, ignoreCase = true) ||
-                    org.replace("-", " ").equals(nameToMatch.replace("-", " "), ignoreCase = true) ||
-                    org.contains(nameToMatch, ignoreCase = true) ||
-                    nameToMatch.contains(org, ignoreCase = true)
+                    it.organism?.trim().equals(nameToMatch, ignoreCase = true)
+                }
+                // 2. Normalized hyphens/spaces exact match
+                if (matched == null) {
+                    val normalizedQuery = nameToMatch.replace("-", " ").replace("/", " ").replace("\\s+".toRegex(), " ").trim()
+                    matched = isolations.find {
+                        val org = it.organism?.replace("-", " ")?.replace("/", " ")?.replace("\\s+".toRegex(), " ")?.trim() ?: ""
+                        org.equals(normalizedQuery, ignoreCase = true)
+                    }
                 }
             }
 
+            // 3. Match by ID if name wasn't found or wasn't provided
             if (matched == null && organismId != null && organismId != 0) {
                 matched = isolations.find { it.id == organismId }
+            }
+
+            // 4. Fallback: prefix match and then substring match
+            if (matched == null && !organismName.isNullOrBlank()) {
+                val lowerQuery = organismName.trim().lowercase()
+                matched = isolations.find {
+                    val org = it.organism?.trim()?.lowercase() ?: ""
+                    org.isNotBlank() && (org.startsWith(lowerQuery) || lowerQuery.startsWith(org))
+                } ?: isolations.find {
+                    val org = it.organism?.trim()?.lowercase() ?: ""
+                    org.isNotBlank() && (org.contains(lowerQuery) || lowerQuery.contains(org))
+                }
             }
 
             if (matched != null) {
@@ -79,11 +97,14 @@ fun EtiologicalAgentFilterScreen(
         }
     }
 
+    val selectedIsolation = response?.etilogicalAgents?.find { it.id == selectedConditionId }
+    val effectiveOrganismName = selectedIsolation?.organism ?: organismName
+
     Scaffold(
         topBar = {
             topBar(
                 topic = "Etiological Agent",
-                patientType = "Select Organism",
+                patientType = effectiveOrganismName ?: "Select Organism",
                 onBackClick = onBackClick
             )
         },
@@ -123,25 +144,7 @@ fun EtiologicalAgentFilterScreen(
                             .padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(18.dp)
                     ) {
-//                        Text(
-//                            text = "Select a Organism",
-//                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-//                            color = MaterialTheme.colorScheme.primary
-//                        )
-//
-//                        // Dropdown
-//                        SingleSelectSearchableSpinnerDialog(
-//                            label = "Organism",
-//                            items = conditions,
-//                            itemLabel = { it.first },
-//                            selectedItem = selectedConditionId,
-//                            onItemSelected = { item -> selectedConditionId = item?.second }
-//                        )
-
                         // Details card for selected condition
-                        val selectedIsolation =
-                            isolations.find { it.id == selectedConditionId }
-
                         if (selectedIsolation != null) {
                             Card(
                                 modifier = Modifier
@@ -172,19 +175,29 @@ fun EtiologicalAgentFilterScreen(
                                             .padding(12.dp)
                                     ) {
                                         Icon(
-                    painter = painterResource(Res.drawable.first_aid_kit),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                    modifier = Modifier.size(48.dp)
-                )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text = "Organism Details: ${selectedIsolation.type}",
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            painter = painterResource(Res.drawable.first_aid_kit),
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                            modifier = Modifier.size(44.dp)
                                         )
+                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Column {
+                                            Text(
+                                                text = selectedIsolation.organism ?: effectiveOrganismName ?: "Organism Details",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 18.sp
+                                                ),
+                                                color = Color(0xFF6A1B9A)
+                                            )
+                                            if (!selectedIsolation.type.isNullOrBlank()) {
+                                                Text(
+                                                    text = "Type: ${selectedIsolation.type}",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
                                     }
 
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -275,6 +288,7 @@ fun IsolationDetailCard(option: EtilogicalAgent?) {
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            InfoRow("Organism", option?.organism ?: "N/A")
             InfoRow("Type", option?.type ?: "N/A")
             InfoRow("Infections Caused", option?.infectionsCaused ?: "N/A")
             InfoRow("First-line Treatment", option?.firstlineTreatment ?: "N/A")

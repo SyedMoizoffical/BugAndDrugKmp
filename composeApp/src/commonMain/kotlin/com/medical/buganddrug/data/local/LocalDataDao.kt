@@ -84,4 +84,43 @@ interface LocalDataDao {
 
     @Query("SELECT * FROM news2_scoring_possibilities WHERE id = 1")
     suspend fun getNews2ScoringPossibilities(): News2ScoringPossibilitiesEntity?
+
+    @Query("DELETE FROM lovs")
+    suspend fun clearLovs(): Int
+
+    @Query("DELETE FROM syndrome_identification_data_q2")
+    suspend fun clearSyndromeIdentificationDataQ2(): Int
+
+    @Query("DELETE FROM syndrome_identification_data")
+    suspend fun clearSyndromeIdentificationData(): Int
+
+    @Query("DELETE FROM iv_to_pos")
+    suspend fun clearIvToPOs(): Int
+
+    @Query("DELETE FROM precaution_finder_list")
+    suspend fun clearPrecautionFinderList(): Int
+
+    @Query("DELETE FROM creatinine_clearance")
+    suspend fun clearCreatinineClearance(): Int
+
+    @Query("DELETE FROM antibiotic_gene_list")
+    suspend fun clearAntibioticGeneList(): Int
+
+    @Query("DELETE FROM exposure_prophylaxis_list")
+    suspend fun clearExposureProPhylaxisList(): Int
+
+    @Query("DELETE FROM bacteria_susceptibility_list")
+    suspend fun clearBacteriaSusceptibilityList(): Int
+
+    @Query("DELETE FROM hiv_art_center_list")
+    suspend fun clearHivArtCenterList(): Int
+
+    @Query("DELETE FROM culture_therapy_guide_list")
+    suspend fun clearCultureTherapyGuideList(): Int
+
+    @Query("DELETE FROM qsofa_scoring_possibilities")
+    suspend fun clearQSofaScoringPossibilities(): Int
+
+    @Query("DELETE FROM news2_scoring_possibilities")
+    suspend fun clearNews2ScoringPossibilities(): Int
 }
