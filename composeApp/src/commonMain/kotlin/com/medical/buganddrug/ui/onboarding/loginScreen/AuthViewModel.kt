@@ -40,38 +40,41 @@ class AuthViewModel (
     val errorMessage: StateFlow<String?> = _errorMessage
 
 
-    fun signInWithEmail(email:String) {
+    fun signIn(email: String, password: String) {
         if (email.isBlank()) {
             _uiState.value = _uiState.value.copy(error = "Please enter your email")
+            return
+        }
+        if (password.isBlank()) {
+            _uiState.value = _uiState.value.copy(error = "Please enter your password")
             return
         }
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
         viewModelScope.launch {
-
-            val result = repository.checkEmailExists(email) // GET SignIn?email=...
+            val result = repository.login(email.trim(), password)
 
             result.fold(
-                onSuccess = { exists ->
-                    if (exists.statusCode == 0) {
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            error = NetworkErrorHandler.sanitizeMessage(exists.msg ?: "Sign in failed")
-                        )
-                    } else {
+                onSuccess = { response ->
+                    if (response.statusCode == 200 || response.success) {
+                        try {
+                            response.data?.token?.let { token ->
+                                sharedPrefs.saveToken(token)
+                            }
+                            sharedPrefs.saveEmail(email.trim())
+                            getAllLocalData()
+                        } catch (_: Exception) {}
+
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
                             isExistingUser = true
                         )
-                        try {
-                            sharedPrefs.saveToken(exists.data!!.token)
-                            sharedPrefs.saveEmail(email)
-                            getAllLocalData()
-                        } catch (_: Exception) {
-
-                        }
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = NetworkErrorHandler.sanitizeMessage(response.msg ?: response.statusMessage ?: "Login failed")
+                        )
                     }
-
                 },
                 onFailure = { throwable ->
                     _uiState.value = _uiState.value.copy(
@@ -83,8 +86,12 @@ class AuthViewModel (
         }
     }
 
+    fun signInWithEmail(email: String, password: String = "") {
+        signIn(email, password)
+    }
+
     // Called only when user is new (isExistingUser == false)
-    fun signUp(name: String,email: String, password: String, pmdc: String) {
+    fun signUp(name: String, email: String, password: String, pmdc: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
@@ -96,24 +103,24 @@ class AuthViewModel (
             )
 
             result.fold(
-                onSuccess = { exists ->
-                    if (exists.statusCode == 0) {
+                onSuccess = { response ->
+                    if (response.statusCode == 200 || response.success) {
+                        try {
+                            sharedPrefs.saveEmail(email.trim())
+                        } catch (_: Exception) {}
+
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
-                            error = NetworkErrorHandler.sanitizeMessage(exists.msg ?: "Sign-up failed")
+                            isOtpSent = true,
+                            otpEmail = email.trim(),
+                            devOtp = response.data?.devOtp,
+                            error = null
                         )
                     } else {
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
-                            isExistingUser = true
+                            error = NetworkErrorHandler.sanitizeMessage(response.msg ?: response.statusMessage ?: "Sign-up failed")
                         )
-                        try {
-                            sharedPrefs.saveToken(exists.data!!.token)
-                            sharedPrefs.saveEmail(email)
-                            getAllLocalData()
-                        } catch (_: Exception) {
-
-                        }
                     }
                 },
                 onFailure = { throwable ->
@@ -124,6 +131,99 @@ class AuthViewModel (
                 }
             )
         }
+    }
+
+    fun getSavedEmail(): String? = sharedPrefs.getEmail()
+
+    fun verifyEmail(otp: String) {
+        val email = _uiState.value.otpEmail
+        if (email.isBlank()) {
+            _uiState.value = _uiState.value.copy(error = "Email address is missing. Please try signing up again.")
+            return
+        }
+        if (otp.isBlank() || otp.length < 6) {
+            _uiState.value = _uiState.value.copy(error = "Please enter the complete 6-digit OTP code")
+            return
+        }
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+
+            val result = repository.verifyEmail(
+                email = email,
+                otp = otp.trim()
+            )
+
+            result.fold(
+                onSuccess = { response ->
+                    if (response.statusCode == 200 || response.success) {
+                        try {
+                            response.data?.token?.let { token ->
+                                sharedPrefs.saveToken(token)
+                            }
+                            sharedPrefs.saveEmail(email.trim())
+                            getAllLocalData()
+                        } catch (_: Exception) {}
+
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            isOtpSent = false,
+                            isExistingUser = true
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = NetworkErrorHandler.sanitizeMessage(response.msg ?: response.statusMessage ?: "Verification failed")
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = throwable.toUserFriendlyMessage()
+                    )
+                }
+            )
+        }
+    }
+
+    fun resendOtp() {
+        val email = _uiState.value.otpEmail
+        if (email.isBlank()) {
+            _uiState.value = _uiState.value.copy(error = "Email address is missing. Please try signing up again.")
+            return
+        }
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null, successMessage = null)
+
+            val result = repository.resendOtp(email = email)
+
+            result.fold(
+                onSuccess = { response ->
+                    if (response.statusCode == 200 || response.success) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            successMessage = response.msg ?: "OTP sent successfully",
+                            error = null
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = NetworkErrorHandler.sanitizeMessage(response.msg ?: response.statusMessage ?: "Failed to resend OTP")
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = throwable.toUserFriendlyMessage()
+                    )
+                }
+            )
+        }
+    }
+
+    fun resetOtpState() {
+        _uiState.value = _uiState.value.copy(isOtpSent = false, devOtp = null, error = null, successMessage = null)
     }
 
     private val _localDataState = MutableStateFlow<LocalDataModel?>(null)
@@ -179,7 +279,10 @@ class AuthViewModel (
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
         _errorMessage.value = null
+    }
 
+    fun clearSuccessMessage() {
+        _uiState.value = _uiState.value.copy(successMessage = null)
     }
 
     fun DismissLoader() {
@@ -195,7 +298,11 @@ data class AuthUiState(
     val email: String = "",
     val isLoading: Boolean = false,
     val error: String? = null,
+    val successMessage: String? = null,
     val isExistingUser: Boolean? = null,     // null = not checked, true = login, false = signup
+    val isOtpSent: Boolean = false,          // true when signup 200 returned and waiting for OTP
+    val otpEmail: String = "",               // email used during signup
+    val devOtp: String? = null,              // devOtp if returned
     val navigateToSurvey: Boolean = false,
     val hasLocalData: Boolean = false
 )

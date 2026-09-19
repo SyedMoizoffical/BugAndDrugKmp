@@ -17,12 +17,13 @@ import com.medical.buganddrug.data.model.hivCenterModel.HivArtCenter
 import com.medical.buganddrug.data.model.patientinfoModel.Data
 import com.medical.buganddrug.data.model.postExosureProplaxisModel.ExposureProPhylaxisModel
 import com.medical.buganddrug.data.remote.ApiService
-import com.medical.buganddrug.ui.onboarding.loginScreen.SignUpResponseDataModel
+import com.medical.buganddrug.ui.onboarding.loginScreen.*
 import com.medical.buganddrug.data.local.*
 import com.medical.buganddrug.data.model.LocalStorageDatamodel.*
 import com.medical.buganddrug.data.remote.NetworkConnectivityChecker
 import com.medical.buganddrug.util.NetworkErrorHandler
 import com.medical.buganddrug.util.toUserFriendlyMessage
+import kotlinx.serialization.json.JsonObject
 
 class QuestionsRepository (
     private val api: ApiService,
@@ -146,17 +147,41 @@ class QuestionsRepository (
         }
     }
 
-    suspend fun signUp(name: String, email: String, password: String, pmdc: String): Result<ApiResponse<SignUpResponseDataModel>> {
+    suspend fun login(email: String, password: String): Result<ApiResponse<VerifyEmailResponseData>> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
+        return try {
+            val response = api.login(
+                LoginRequest(
+                    Email = email,
+                    Password = password
+                )
+            )
+            if (response.statusCode == 200 || response.success) {
+                Result.success(response)
+            } else if (response.statusCode == 401) {
+                Result.failure(Exception(NetworkErrorHandler.SESSION_EXPIRED_MESSAGE))
+            } else {
+                val errorMsg = NetworkErrorHandler.sanitizeMessage(response.msg ?: response.statusMessage ?: "Login failed")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception(e.toUserFriendlyMessage()))
+        }
+    }
+
+    suspend fun signUp(name: String, email: String, password: String, pmdc: String): Result<ApiResponse<SignUpResponseData>> {
         if (networkChecker?.isNetworkAvailable() == false) {
             return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
         }
         return try {
             val response = api.signUp(
-                mapOf(
-                    "name"     to name,
-                    "email"    to email,
-                    "password" to password,
-                    "pmdc"     to pmdc
+                SignUpRequest(
+                    Name = name,
+                    Email = email,
+                    Password = password,
+                    PMDC = pmdc
                 )
             )
             if (response.statusCode == 200 || response.success) {
@@ -165,6 +190,76 @@ class QuestionsRepository (
                 Result.failure(Exception(NetworkErrorHandler.SESSION_EXPIRED_MESSAGE))
             } else {
                 val errorMsg = NetworkErrorHandler.sanitizeMessage(response.msg ?: response.statusMessage ?: "Sign up failed")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception(e.toUserFriendlyMessage()))
+        }
+    }
+
+    suspend fun verifyEmail(email: String, otp: String): Result<ApiResponse<VerifyEmailResponseData>> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
+        return try {
+            val response = api.verifyEmail(
+                VerifyEmailRequest(
+                    Email = email,
+                    Otp = otp
+                )
+            )
+            if (response.statusCode == 200 || response.success) {
+                Result.success(response)
+            } else if (response.statusCode == 401) {
+                Result.failure(Exception(NetworkErrorHandler.SESSION_EXPIRED_MESSAGE))
+            } else {
+                val errorMsg = NetworkErrorHandler.sanitizeMessage(response.msg ?: response.statusMessage ?: "Verification failed")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception(e.toUserFriendlyMessage()))
+        }
+    }
+
+    suspend fun resendOtp(email: String): Result<ApiResponse<ResendOtpResponseData>> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
+        return try {
+            val response = api.resendOtp(
+                ResendOtpRequest(
+                    Email = email
+                )
+            )
+            if (response.statusCode == 200 || response.success) {
+                Result.success(response)
+            } else if (response.statusCode == 401) {
+                Result.failure(Exception(NetworkErrorHandler.SESSION_EXPIRED_MESSAGE))
+            } else {
+                val errorMsg = NetworkErrorHandler.sanitizeMessage(response.msg ?: response.statusMessage ?: "Failed to resend OTP")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception(e.toUserFriendlyMessage()))
+        }
+    }
+
+    suspend fun deleteAccount(email: String): Result<ApiResponse<JsonObject?>> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
+        return try {
+            val response = api.deleteAccount(
+                DeleteAccountRequest(
+                    Email = email
+                )
+            )
+            if (response.statusCode == 200 || response.success) {
+                Result.success(response)
+            } else if (response.statusCode == 401) {
+                Result.failure(Exception(NetworkErrorHandler.SESSION_EXPIRED_MESSAGE))
+            } else {
+                val errorMsg = NetworkErrorHandler.sanitizeMessage(response.msg ?: response.statusMessage ?: "Failed to delete account")
                 Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {

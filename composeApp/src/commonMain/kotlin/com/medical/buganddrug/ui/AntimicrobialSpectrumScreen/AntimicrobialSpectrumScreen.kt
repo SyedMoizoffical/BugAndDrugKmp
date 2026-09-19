@@ -1,31 +1,22 @@
 package com.medical.buganddrug.ui.antimicrobial
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import buganddrug_multiplateform.composeapp.generated.resources.Res
-import buganddrug_multiplateform.composeapp.generated.resources.search
 import com.medical.buganddrug.data.model.AntimicrobialSpectrumData.BacteriaRow
 import com.medical.buganddrug.data.model.LocalStorageDatamodel.GridLists
 import com.medical.buganddrug.ui.AntimicrobialSpectrumScreen.AntimicrobialSpectrumViewModel
@@ -33,8 +24,6 @@ import com.medical.buganddrug.ui.QuickIDConsult.Q1.QuestionViewModel
 import com.medical.buganddrug.ui.QuickIDConsult.topBar
 import com.medical.buganddrug.util.ErrorAlertDialog
 import com.medical.buganddrug.util.LoadingOverlay
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun AntimicrobialSpectrumScreen(
@@ -50,27 +39,26 @@ fun AntimicrobialSpectrumScreen(
     val isLoading by viewModel.loading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
+
+
+
     val verticalScroll = rememberScrollState()
     val horizontalScroll = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()
-    val density = LocalDensity.current
-    val focusManager = LocalFocusManager.current
 
-    var searchQuery by remember { mutableStateOf("") }
-    var highlightedOrganismIndex by remember { mutableStateOf<Int?>(null) }
-    var highlightedAntibioticIndex by remember { mutableStateOf<Int?>(null) }
-
-    // Function to return color based on value (Enhanced contrast and accessible palette)
+    // Function to return color based on value
     fun colorForValue(value: Int): Color = when (value) {
-        3 -> Color(0xFF10B981) // Emerald Green - Recommended
-        2 -> Color(0xFF0284C7) // Sky Blue - Effective
-        1 -> Color(0xFFF59E0B) // Amber - Variable
-        else -> Color(0xFFEF4444) // Crimson Red - Not effective
+        3 -> Color(0xFF50c878) // Green
+        2 -> Color(0xFF03A9F4) // Yellow
+        1 -> Color(0xFFffd700) // Red
+        else -> Color(0xFFdc143c) // Gray
     }
 
     Scaffold(
+
         topBar = {
             topBar(onBackClick, "Antimicrobial Spectrum", patientType = patientType)
+
+            //          TopAppBar(title = { Text("qSOFA + NEWS2 Assessment") })
         },
         containerColor = Color.Transparent
     ) { padding ->
@@ -82,58 +70,67 @@ fun AntimicrobialSpectrumScreen(
                         listOf(
                             Color(0xFFFFFFFF),
                             Color(0xFFF3E5F5)   // Very soft lavender
-                        )
-                    )
+                        )                    )
                 )
                 .padding(padding)
                 .padding(16.dp)
         ) {
+
             Column {
-                // Legend Card
-                ElevatedCard(
+                // Legend (2x2 matrix)
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                        .padding(bottom = 16.dp)
+                        .background(Color.White, RoundedCornerShape(12.dp))
+                        .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
+                        .padding(12.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Interpretation of Scores",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF800080)
-                            ),
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
+                    Text(
+                        text = "Interpretation of Scores",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF800080)
+                        ),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                        // 2x2 Grid Layout
-                        Column(
+                    // 2x2 Grid Layout
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                LegendItem(color = Color(0xFFEF4444), label = "0 = Not effective")
-                                LegendItem(color = Color(0xFFF59E0B), label = "1 = May or may not be")
-                            }
+                            LegendItem(color = Color(0xFFdc143c), label = "0 = Not effective")
+                            LegendItem(color = Color(0xFFffd700), label = "1 = May or may not be")
+                        }
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                LegendItem(color = Color(0xFF0284C7), label = "2 = Effective")
-                                LegendItem(color = Color(0xFF10B981), label = "3 = Recommended")
-                            }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            LegendItem(color = Color(0xFF03A9F4), label = "2 = Effective")
+                            LegendItem(color = Color(0xFF50c878), label = "3 = Recommended")
                         }
                     }
                 }
 
+                // Add title for the matrix
+                Text(
+                    text = "Antimicrobial Activity Matrix",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF800080)
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(vertical = 8.dp)
+                )
                 if (response != null && !isLoading) {
                     val columnHeaders = listOf(
                         "penicillin",
@@ -181,164 +178,17 @@ fun AntimicrobialSpectrumScreen(
                         "nitrofurantoin",
                         "Intravenous Fosfomycin",
                         "Oral Fosfomycin"
-                    ).sortedBy { it.lowercase() }
-
-                    // Sort organisms in alphabetical order
-                    val sortedGridLists = response.gridLists.sortedBy { (it.Label ?: "").lowercase() }
-
-                    // Row headers
-                    val rowHeaders = sortedGridLists.map { it.Label }
-
-                    // Function to scroll to match
-                    fun scrollToMatch(query: String) {
-                        val q = query.trim().lowercase()
-                        if (q.isNotEmpty()) {
-                            val orgIdx = rowHeaders.indexOfFirst { (it ?: "").lowercase().contains(q) }
-                            val antIdx = columnHeaders.indexOfFirst { it.lowercase().contains(q) }
-                            highlightedOrganismIndex = if (orgIdx != -1) orgIdx else null
-                            highlightedAntibioticIndex = if (antIdx != -1) antIdx else null
-                            coroutineScope.launch {
-                                if (orgIdx != -1) {
-                                    val rowHeightPx = with(density) { 60.dp.toPx() }
-                                    verticalScroll.animateScrollTo((orgIdx * rowHeightPx).toInt())
-                                }
-                                if (antIdx != -1) {
-                                    val colWidthPx = with(density) { 160.dp.toPx() }
-                                    horizontalScroll.animateScrollTo((antIdx * colWidthPx).toInt())
-                                }
-                            }
-                        } else {
-                            highlightedOrganismIndex = null
-                            highlightedAntibioticIndex = null
-                        }
-                    }
-
-                    // Search Bar
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { query ->
-                            searchQuery = query
-                            scrollToMatch(query)
-                        },
-                        placeholder = {
-                            Text(
-                                "Search Organism or Antibiotic...",
-                                fontSize = 13.sp,
-                                color = Color(0xFF94A3B8)
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.search),
-                                contentDescription = "Search",
-                                tint = Color(0xFF800080),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        },
-                        trailingIcon = {
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(onClick = {
-                                    searchQuery = ""
-                                    scrollToMatch("")
-                                }) {
-                                    Text("✕", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B))
-                                }
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(onSearch = {
-                            focusManager.clearFocus()
-                            scrollToMatch(searchQuery)
-                        }),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White,
-                            focusedBorderColor = Color(0xFF800080),
-                            unfocusedBorderColor = Color(0xFFE2E8F0)
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 6.dp)
                     )
+// ✅ Row headers
+                    val rowHeaders = response!!.gridLists.map{ it.Label }
 
-                    // Matching result chips
-                    val matchingOrganisms = if (searchQuery.isNotBlank()) {
-                        rowHeaders.mapIndexedNotNull { index, name ->
-                            if (name != null && name.contains(searchQuery, ignoreCase = true)) index to name else null
-                        }
-                    } else emptyList()
-
-                    val matchingAntibiotics = if (searchQuery.isNotBlank()) {
-                        columnHeaders.mapIndexedNotNull { index, name ->
-                            if (name.contains(searchQuery, ignoreCase = true)) index to name else null
-                        }
-                    } else emptyList()
-
-                    if (matchingOrganisms.isNotEmpty() || matchingAntibiotics.isNotEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState())
-                                .padding(bottom = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            matchingOrganisms.take(6).forEach { (idx, name) ->
-                                AssistChip(
-                                    onClick = {
-                                        highlightedOrganismIndex = idx
-                                        highlightedAntibioticIndex = null
-                                        focusManager.clearFocus()
-                                        coroutineScope.launch {
-                                            val rowHeightPx = with(density) { 60.dp.toPx() }
-                                            verticalScroll.animateScrollTo((idx * rowHeightPx).toInt())
-                                        }
-                                    },
-                                    label = { Text("🦠 $name", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
-                                    colors = AssistChipDefaults.assistChipColors(
-                                        containerColor = if (highlightedOrganismIndex == idx) Color(0xFFF3E8FF) else Color.White
-                                    ),
-                                    border = BorderStroke(
-                                        1.dp,
-                                        if (highlightedOrganismIndex == idx) Color(0xFF800080) else Color(0xFFE2E8F0)
-                                    )
-                                )
-                            }
-
-                            matchingAntibiotics.take(6).forEach { (idx, name) ->
-                                val displayName = name.lowercase().split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
-                                AssistChip(
-                                    onClick = {
-                                        highlightedAntibioticIndex = idx
-                                        highlightedOrganismIndex = null
-                                        focusManager.clearFocus()
-                                        coroutineScope.launch {
-                                            val colWidthPx = with(density) { 160.dp.toPx() }
-                                            horizontalScroll.animateScrollTo((idx * colWidthPx).toInt())
-                                        }
-                                    },
-                                    label = { Text("💊 $displayName", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
-                                    colors = AssistChipDefaults.assistChipColors(
-                                        containerColor = if (highlightedAntibioticIndex == idx) Color(0xFFF3E8FF) else Color.White
-                                    ),
-                                    border = BorderStroke(
-                                        1.dp,
-                                        if (highlightedAntibioticIndex == idx) Color(0xFF800080) else Color(0xFFE2E8F0)
-                                    )
-                                )
-                            }
-                        }
-                    }
-
-                    // Table matrix
+                    // ✅ Table matrix
                     val data: List<List<Int?>> =
-                        sortedGridLists.map { row ->
+                        response.gridLists.map { row ->
                             columnHeaders.map { column ->
                                 row.valueForColumn(column)
                             }
                         }
-
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
@@ -351,6 +201,7 @@ fun AntimicrobialSpectrumScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.width(120.dp)
                         ) {
+
                             Text(
                                 text = "Organisms",
                                 style = MaterialTheme.typography.labelLarge.copy(
@@ -367,32 +218,32 @@ fun AntimicrobialSpectrumScreen(
                                     .verticalScroll(verticalScroll)
                                     .padding(0.dp, 40.dp, 0.dp, 0.dp)
                             ) {
+
                                 rowHeaders.forEachIndexed { index, rowHeader ->
-                                    val isHighlighted = highlightedOrganismIndex == index
+
+                                    // Check corresponding data row
+                                    val isAllZeroRow = data.getOrNull(index)
+                                        ?.all { (it ?: 0) == 0 } == true
 
                                     Box(
                                         modifier = Modifier
                                             .height(60.dp)
                                             .fillMaxWidth()
-                                            .background(
-                                                if (isHighlighted) Color(0xFF800080).copy(alpha = 0.3f)
-                                                else Color(0xFF800080).copy(alpha = 0.1f)
-                                            )
-                                            .border(
-                                                width = if (isHighlighted) 2.dp else 0.5.dp,
-                                                color = if (isHighlighted) Color(0xFF800080) else Color.LightGray
-                                            )
-                                            .padding(start = 8.dp),
-                                        contentAlignment = Alignment.CenterStart
+                                            .background(Color(0xFF800080).copy(alpha = 0.1f))
+                                            .border(0.5.dp, Color.LightGray),
+
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            text = rowHeader ?: "",
-                                            style = MaterialTheme.typography.bodySmall.copy(
-                                                fontWeight = if (isHighlighted) FontWeight.ExtraBold else FontWeight.Bold,
-                                                color = if (isHighlighted) Color(0xFF581C87) else Color.Black,
-                                                fontSize = 11.sp
-                                            ),
-                                            textAlign = TextAlign.Start
+                                            text = rowHeader!!,
+                                            textAlign = TextAlign.Center,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = if (isAllZeroRow)
+                                                    Color(0xFF800080)   // 👈 Change color if all zero
+                                                else
+                                                    Color.Black
+                                            )
                                         )
                                     }
                                 }
@@ -419,21 +270,13 @@ fun AntimicrobialSpectrumScreen(
 
                             // Column headers
                             Row {
-                                columnHeaders.forEachIndexed { colIndex, header ->
-                                    val isHighlighted = highlightedAntibioticIndex == colIndex
-
+                                columnHeaders.forEach { header ->
                                     Box(
                                         modifier = Modifier
                                             .width(160.dp)
                                             .height(40.dp)
-                                            .background(
-                                                if (isHighlighted) Color(0xFF4A0E4E)
-                                                else Color(0xFF800080)
-                                            )
-                                            .border(
-                                                width = if (isHighlighted) 2.dp else 0.5.dp,
-                                                color = if (isHighlighted) Color(0xFFFFD700) else Color.White
-                                            ),
+                                            .background(Color(0xFF800080))
+                                            .border(0.5.dp, Color.White),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
@@ -441,11 +284,12 @@ fun AntimicrobialSpectrumScreen(
                                                 .lowercase()
                                                 .split(" ")
                                                 .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } },
-                                            style = MaterialTheme.typography.bodySmall.copy(
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (isHighlighted) Color(0xFFFFD700) else Color.White,
-                                                fontSize = 11.sp
-                                            )
+                                            textAlign = TextAlign.Center,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            fontSize = 11.sp
                                         )
                                     }
                                 }
@@ -453,30 +297,33 @@ fun AntimicrobialSpectrumScreen(
 
                             // Data rows
                             Column(modifier = Modifier.verticalScroll(verticalScroll)) {
-                                data.forEachIndexed { rIndex, row ->
-                                    val isRowHighlighted = highlightedOrganismIndex == rIndex
+                                data.forEach { row ->
+
+                                    // Check if full row contains only 0 (or null treated as 0)
+                                    val isAllZeroRow = row.all { (it ?: 0) == 0 }
 
                                     Row {
-                                        row.forEachIndexed { cIndex, value ->
+                                        row.forEach { value ->
                                             val cellValue = value ?: 0
-                                            val isColHighlighted = highlightedAntibioticIndex == cIndex
 
                                             Box(
                                                 modifier = Modifier
                                                     .width(160.dp)
                                                     .height(60.dp)
-                                                    .background(colorForValue(cellValue))
-                                                    .border(
-                                                        width = if (isRowHighlighted || isColHighlighted) 1.5.dp else 0.5.dp,
-                                                        color = if (isRowHighlighted || isColHighlighted) Color(0xFF800080) else Color(0xFFE0E0E0)
-                                                    ),
+                                                    .background(
+                                                        if (isAllZeroRow) Color.White
+                                                        else colorForValue(cellValue)
+                                                    )
+                                                    .border(0.5.dp, Color(0xFFE0E0E0)),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Text(
                                                     text = cellValue.toString(),
                                                     style = MaterialTheme.typography.bodyMedium.copy(
                                                         fontWeight = FontWeight.Bold,
-                                                        color = if (cellValue == 2) Color.Black else Color.White
+                                                        color = if (isAllZeroRow) Color.White
+                                                        else if (cellValue == 2) Color.Black
+                                                        else Color.White
                                                     )
                                                 )
                                             }
@@ -487,19 +334,20 @@ fun AntimicrobialSpectrumScreen(
                         }
                     }
                 }
+                // 🔹 LOADER (on top)
+                if (isLoading) {
+                    LoadingOverlay()
+                }
+                if (errorMessage != null) {
+                    ErrorAlertDialog(errorMessage = errorMessage, onDismiss = { viewModel.clearError() })
+                }
             }
 
-            // 🔹 LOADER (on top)
-            if (isLoading) {
-                LoadingOverlay()
-            }
-            if (errorMessage != null) {
-                ErrorAlertDialog(errorMessage = errorMessage, onDismiss = { viewModel.clearError() })
-            }
+
         }
     }
-}
 
+}
 @Composable
 fun LegendItem(color: Color, label: String) {
     Row(

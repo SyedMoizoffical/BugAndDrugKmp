@@ -16,6 +16,15 @@ class LogoutViewModel(
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    fun getEmail(): String? = sharedPrefs.getEmail()
+
+    fun clearError() {
+        _error.value = null
+    }
+
     fun logout(onComplete: () -> Unit) {
         viewModelScope.launch {
             _loading.value = true
@@ -29,6 +38,41 @@ class LogoutViewModel(
             } finally {
                 _loading.value = false
                 onComplete()
+            }
+        }
+    }
+
+    fun deleteAccount(onSuccess: () -> Unit) {
+        val email = sharedPrefs.getEmail() ?: ""
+        if (email.isBlank()) {
+            _error.value = "User email not found. Please log in again."
+            return
+        }
+        viewModelScope.launch {
+            _loading.value = true
+            _error.value = null
+            try {
+                val result = repository.deleteAccount(email)
+                result.fold(
+                    onSuccess = { response ->
+                        if (response.statusCode == 200 || response.success) {
+                            sharedPrefs.clearAll()
+                            repository.clearLocalData()
+                            _loading.value = false
+                            onSuccess()
+                        } else {
+                            _loading.value = false
+                            _error.value = response.msg ?: response.statusMessage ?: "Failed to delete account"
+                        }
+                    },
+                    onFailure = { ex ->
+                        _loading.value = false
+                        _error.value = ex.message ?: "Failed to delete account"
+                    }
+                )
+            } catch (e: Exception) {
+                _loading.value = false
+                _error.value = e.message ?: "An unexpected error occurred"
             }
         }
     }

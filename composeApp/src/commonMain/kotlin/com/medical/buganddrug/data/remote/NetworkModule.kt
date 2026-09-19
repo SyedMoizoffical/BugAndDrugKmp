@@ -23,7 +23,7 @@ val networkModule = module {
             }
             defaultRequest {
                 url("http://154.26.128.29:905/api/")
-
+              //  https://bder.duhs.edu.pk
                 preferenceManager.getToken()?.let { token ->
                     header("Authorization", "Bearer $token")
                 }

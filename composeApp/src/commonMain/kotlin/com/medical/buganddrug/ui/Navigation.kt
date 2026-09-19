@@ -39,6 +39,7 @@ import com.medical.buganddrug.ui.clinicalSyndrome.ClinicalSyndromeViewModel
 import com.medical.buganddrug.ui.onboarding.InpatientQuestion
 import com.medical.buganddrug.ui.onboarding.NavDrawer.DisclaimerScreen
 import com.medical.buganddrug.ui.onboarding.NavDrawer.LogoutScreen
+import com.medical.buganddrug.ui.onboarding.NavDrawer.SettingsScreen
 import com.medical.buganddrug.ui.onboarding.NavDrawer.bugReportScreen.BugReportViewModel
 import com.medical.buganddrug.ui.onboarding.OutpatientQuestion
 import com.medical.buganddrug.ui.onboarding.PatientTypeSelectionScreen
@@ -92,11 +93,12 @@ object AppScreens {
                 onPreSurveyClick = { navigator?.push(PreSurvey) },
                 onInPatientTypeClick = { navigator?.push(InPatientQuestion) },
                 onOutPatientTypeClick = { navigator?.push(OutPatientQuestion) },
+                onSettingsClick = { navigator?.push(Settings) },
                 onBackClick = { navigator?.pop() },
                 onBugReportClick = { navigator?.push(BugReport) },
                 onPrivacyPolicyClick = { navigator?.push(Disclaimer) },
                 onLogoutClick = { navigator?.push(Logout) },
-                authViewModel =viewModel
+                authViewModel = viewModel
             )
         }
     }
@@ -400,6 +402,21 @@ object AppScreens {
             val navigator = LocalNavigator.currentOrThrow
             val vm: BugReportViewModel = koinInject()
             BugReportScreen({ navigator?.pop() },vm)
+        }
+    }
+
+    object Settings : Screen {
+        @Composable override fun Content() {
+            val navigator = LocalNavigator.currentOrThrow
+            val vm: LogoutViewModel = koinInject()
+
+            SettingsScreen(
+                viewModel = vm,
+                onBackClick = { navigator?.pop() },
+                onConfirmLogout = {
+                    navigator?.replaceAll(Welcome)
+                }
+            )
         }
     }
 

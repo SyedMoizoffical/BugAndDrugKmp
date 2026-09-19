@@ -57,43 +57,43 @@ fun CopyrightFooter(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Built by",
+                text = "Powered by",
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 10.sp,
                 ),
                 color = textColor
             )
             Text(
-                text = "AutoBar",
+                text = " Autobar Pvt. Ltd.",
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 10.sp ,
                 ),
                 color = textColor,
             )
-            Text(
-                text = " • ",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.sp
-                ),
-                color = textColor
-            )
-            Text(
-                text = "www.autobar.com.pk",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.sp ,
-                ),
-                color = textColor,
-//                modifier = Modifier.clickable(
-//                    interactionSource = remember { MutableInteractionSource() },
-//                    indication = null
-//                ) {
-//                    try {
-//                        uriHandler.openUri("https://www.autobar.com.pk")
-//                    } catch (e: Exception) {
-//                        // ignore URI open error if no browser handler available
-//                    }
-//                }
-            )
+//            Text(
+//                text = " • ",
+//                style = MaterialTheme.typography.labelSmall.copy(
+//                    fontSize = 10.sp
+//                ),
+//                color = textColor
+//            )
+//            Text(
+//                text = "www.autobar.com.pk",
+//                style = MaterialTheme.typography.labelSmall.copy(
+//                    fontSize = 10.sp ,
+//                ),
+//                color = textColor,
+////                modifier = Modifier.clickable(
+////                    interactionSource = remember { MutableInteractionSource() },
+////                    indication = null
+////                ) {
+////                    try {
+////                        uriHandler.openUri("https://www.autobar.com.pk")
+////                    } catch (e: Exception) {
+////                        // ignore URI open error if no browser handler available
+////                    }
+////                }
+//            )
         }
     }
 }

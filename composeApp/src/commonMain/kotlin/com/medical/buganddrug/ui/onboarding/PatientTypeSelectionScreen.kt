@@ -26,7 +26,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -81,6 +84,7 @@ fun PatientTypeSelectionScreen(
     onPreSurveyClick: () -> Unit = {},
     onInPatientTypeClick: () -> Unit = {},
     onOutPatientTypeClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     onBugReportClick: () -> Unit = {},
     onPrivacyPolicyClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
@@ -133,11 +137,10 @@ fun PatientTypeSelectionScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 val items = listOf(
-                    Triple("Bug Report", painterResource(Res.drawable.reportissue),
-                        onBugReportClick),
+                    Triple("Settings", rememberVectorPainter(Icons.Default.Settings), onSettingsClick),
+                    Triple("Bug Report", painterResource(Res.drawable.reportissue), onBugReportClick),
                     Triple("Privacy Policy", painterResource(Res.drawable.insurance), onPrivacyPolicyClick),
                     Triple("Sign Out", painterResource(Res.drawable.exit), onLogoutClick),
-
                 )
 
                 items.forEach { (title, icon, action) ->
@@ -502,8 +505,6 @@ fun PatientTypeSelectionScreen(
                     onDismissRequest = animateDismiss,
                     properties = DialogProperties(
                         usePlatformDefaultWidth = false,
-                        decorFitsSystemWindows = false,
-
                         dismissOnBackPress = true,
                         dismissOnClickOutside = false
                     )

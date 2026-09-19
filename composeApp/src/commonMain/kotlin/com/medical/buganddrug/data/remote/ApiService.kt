@@ -18,13 +18,14 @@ import com.medical.buganddrug.data.model.Survey.AppSurveyPostRequest
 import com.medical.buganddrug.data.model.hivCenterModel.HivArtCenterResponse
 import com.medical.buganddrug.data.model.patientinfoModel.Data
 import com.medical.buganddrug.data.model.postExosureProplaxisModel.ExposureProPhylaxisModel
-import com.medical.buganddrug.ui.onboarding.loginScreen.SignUpResponseDataModel
+import com.medical.buganddrug.ui.onboarding.loginScreen.*
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.http.*
+import kotlinx.serialization.json.JsonObject
 
 class ApiService(
     private val client: HttpClient
@@ -119,10 +120,38 @@ class ApiService(
         }.body()
     }
 
-    suspend fun signUp(body: Map<String, String>): ApiResponse<SignUpResponseDataModel> {
+    suspend fun login(request: LoginRequest): ApiResponse<VerifyEmailResponseData> {
+        return client.post("login") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun signUp(request: SignUpRequest): ApiResponse<SignUpResponseData> {
         return client.post("SignUp") {
             contentType(ContentType.Application.Json)
-            setBody(body)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun verifyEmail(request: VerifyEmailRequest): ApiResponse<VerifyEmailResponseData> {
+        return client.post("verify-email") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun resendOtp(request: ResendOtpRequest): ApiResponse<ResendOtpResponseData> {
+        return client.post("resend-otp") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun deleteAccount(request: DeleteAccountRequest): ApiResponse<JsonObject?> {
+        return client.post("delete-account") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
         }.body()
     }
 
