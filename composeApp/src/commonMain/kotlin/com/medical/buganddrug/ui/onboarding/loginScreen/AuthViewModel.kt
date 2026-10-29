@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medical.buganddrug.getAppVersion
+import com.medical.buganddrug.data.model.CheckVersionRequest
 import com.medical.buganddrug.data.model.LocalStorageDatamodel.LocalDataModel
 import com.medical.buganddrug.data.model.LocalStorageDatamodel.LocalDataStorageModel
 import com.medical.buganddrug.data.model.QoestionsModel.Q2Model.QuestionTwoResponseModel
@@ -276,6 +278,60 @@ class AuthViewModel (
     }
 
 
+    private val _versionDialogState = MutableStateFlow<VersionDialogState?>(null)
+    val versionDialogState: StateFlow<VersionDialogState?> = _versionDialogState.asStateFlow()
+
+    fun dismissVersionDialog() {
+        _versionDialogState.value = null
+    }
+
+    fun checkVersionIfDataExists() {
+        viewModelScope.launch {
+            try {
+                val savedEmail = sharedPrefs.getEmail() ?: ""
+                val currentDataVersion = sharedPrefs.getDataVersion()
+                val currentAppVersion = getAppVersion()
+
+                val request = CheckVersionRequest(
+                    userEmail = savedEmail,
+                    appVersion = currentAppVersion,
+                    dataVersion = currentDataVersion
+                )
+
+                val result = repository.checkVersion(request)
+                result.onSuccess { response ->
+                    if (response.success) {
+                        response.latestDataVersion?.let { newVersion ->
+                            sharedPrefs.saveDataVersion(newVersion)
+                        }
+
+                        if (response.isDataUpdateRequired) {
+                            repository.getAllLocalData()
+                            printExtractedDiseaseList()
+                        }
+
+                        if (response.isAppUpdateRequired || response.isDataUpdateRequired) {
+                            _versionDialogState.value = VersionDialogState(
+                                isAppUpdateRequired = response.isAppUpdateRequired,
+                                isDataUpdateRequired = response.isDataUpdateRequired,
+                                latestAppVersion = response.latestAppVersion,
+                                latestDataVersion = response.latestDataVersion,
+                                releaseNotes = response.releaseNotes,
+                                message = response.message
+                            )
+                        }
+                    }
+                }.onFailure {
+                    // Silently ignore network / version check failures as requested
+                    println("👉 checkVersion skipped/failed silently: ${it.message}")
+                }
+            } catch (e: Exception) {
+                // Silently ignore
+                println("👉 checkVersion exception: ${e.message}")
+            }
+        }
+    }
+
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
         _errorMessage.value = null
@@ -293,6 +349,15 @@ class AuthViewModel (
         _uiState.value = _uiState.value.copy(navigateToSurvey = false)
     }
 }
+
+data class VersionDialogState(
+    val isAppUpdateRequired: Boolean = false,
+    val isDataUpdateRequired: Boolean = false,
+    val latestAppVersion: String? = null,
+    val latestDataVersion: Int? = null,
+    val releaseNotes: String? = null,
+    val message: String? = null
+)
 
 data class AuthUiState(
     val email: String = "",

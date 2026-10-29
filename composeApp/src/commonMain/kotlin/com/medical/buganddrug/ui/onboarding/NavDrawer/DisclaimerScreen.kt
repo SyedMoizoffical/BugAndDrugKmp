@@ -121,7 +121,7 @@ fun DisclaimerScreen(
 
                     "6. Contact Information\n" +
                             "Email: bug.drug@duhs.edu.pk\n" +
-                            "Organization: Dow University of Health Sciences, Karachi."
+                            "Organization: Sindh Infectious Diseases Hospital and Research Centre/ Dow University of Health Sciences, Karachi."
                 )
 
                 val uriHandler = LocalUriHandler.current

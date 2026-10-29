@@ -11,7 +11,7 @@ data class GridLists(
     @SerialName("Amoxicillin")
     val Amoxicillin: Int? = 0,
 
-    @SerialName("Amoxicillin-clavulanate")
+    @SerialName("Amoxicillinclavulanate")
     val Amoxicillinclavulanate: Int? = 0,
 
     @SerialName("Ampicillin")
@@ -23,49 +23,49 @@ data class GridLists(
     @SerialName("Aztreonam")
     val Aztreonam: Int? = 0,
 
-    @SerialName("Aztreonam-avibactam")
+    @SerialName("Aztreonamavibactam")
     val Aztreonamavibactam: Int? = 0,
 
-    @SerialName("Cefazolin (1st generation)")
+    @SerialName("Cefazolin1stgeneration")
     val Cefazolin1stgeneration: Int? = 0,
 
-    @SerialName("Cefepime (4th generation)")
+    @SerialName("Cefepime4thgeneration")
     val Cefepime4thgeneration: Int? = 0,
 
-    @SerialName("Cefiderocol (5th generation)")
+    @SerialName("Cefiderocol5thgeneration")
     val Cefiderocol5thgeneration: Int? = 0,
 
-    @SerialName("Cefixime (2nd generation)")
+    @SerialName("Cefixime2ndgeneration")
     val Cefixime2ndgeneration: Int? = 0,
 
-    @SerialName("Cefoperazone (3rd generation)")
+    @SerialName("Cefoperazone3rdgeneration")
     val Cefoperazone3rdgeneration: Int? = 0,
 
-    @SerialName("Cefoperazone sulbactam")
+    @SerialName("Cefoperazonesulbactam")
     val Cefoperazonesulbactam: Int? = 0,
 
-    @SerialName("Cefotaxime (3rd generation)")
+    @SerialName("Cefotaxime3rdgeneration")
     val Cefotaxime3rdgeneration: Int? = 0,
 
-    @SerialName("Cefpodoxime (3rd generation)")
+    @SerialName("Cefpodoxime3rdgeneration")
     val Cefpodoxime3rdgeneration: Int? = 0,
 
-    @SerialName("Ceftaroline (5th generation)")
+    @SerialName("Ceftaroline5thgeneration")
     val Ceftaroline5thgeneration: Int? = 0,
 
-    @SerialName("Ceftazidime (3rd generation)")
+    @SerialName("Ceftazidime3rdgeneration")
     val Ceftazidime3rdgeneration: Int? = 0,
 
-    @SerialName("Ceftazidime-Avibactam")
+    @SerialName("CeftazidimeAvibactam")
     val CeftazidimeAvibactam: Int? = 0,
 
-    @SerialName("Ceftriaxone (3rd generation)")
+    @SerialName("Ceftriaxone3rdgeneration")
     val Ceftriaxone3rdgeneration: Int? = 0,
 
-    @SerialName("Cefuroxime (2nd generation)")
+    @SerialName("Cefuroxime2ndgeneration")
     val Cefuroxime2ndgeneration: Int? = 0,
 
-    @SerialName("Cephalexin (1st generation)")
+    @SerialName("Cephalexin1stgeneration")
     val Cephalexin1stgeneration: Int? = 0,
 
     @SerialName("Ciprofloxacin")
@@ -95,13 +95,13 @@ data class GridLists(
     @SerialName("Erythromycin")
     val Erythromycin: Int? = 0,
 
-    @SerialName("Fosfomycin (IV)")
+    @SerialName("FosfomycinIV")
     val FosfomycinIV: Int? = 0,
 
-    @SerialName("Fosfomycin (PO)")
+    @SerialName("FosfomycinPO")
     val FosfomycinPO: Int? = 0,
 
-    @SerialName("Gentamicin")
+    @SerialName("gentamicin")
     val gentamicin: Int? = 0,
 
     @SerialName("Imipenem")
@@ -131,13 +131,13 @@ data class GridLists(
     @SerialName("Nitrofurantoin")
     val Nitrofurantoin: Int? = 0,
 
-    @SerialName("Penicillin G")
+    @SerialName("Penicilling")
     val Penicilling: Int? = 0,
 
-    @SerialName("Piperacillin-tazobactam")
+    @SerialName("Piperacillintazobactam")
     val Piperacillintazobactam: Int? = 0,
 
-    @SerialName("TMP-SMX")
+    @SerialName("TMPSMX")
     val TMPSMX: Int? = 0,
 
     @SerialName("Tigecycline")

@@ -14,7 +14,7 @@ data class BacteriaRow(
     @SerialName("Label")
     val label: String,
 
-    @SerialName("Penicillin G")
+    @SerialName("Penicilling")
     val penicillinG: Int?,
 
     @SerialName("Cloxacillin")
@@ -26,52 +26,52 @@ data class BacteriaRow(
     @SerialName("Amoxicillin")
     val amoxicillin: Int?,
 
-    @SerialName("Amoxicillin-clavulanate")
+    @SerialName("Amoxicillinclavulanate")
     val amoxicillinClavulanate: Int?,
 
-    @SerialName("Piperacillin-tazobactam")
+    @SerialName("Piperacillintazobactam")
     val piperacillinTazobactam: Int?,
 
-    @SerialName("Cephalexin (1st generation)")
+    @SerialName("Cephalexin1stgeneration")
     val cephalexin: Int?,
 
-    @SerialName("Cefazolin (1st generation)")
+    @SerialName("Cefazolin1stgeneration")
     val cefazolin: Int?,
 
-    @SerialName("Cefixime (2nd generation)")
+    @SerialName("Cefixime2ndgeneration")
     val cefixime: Int?,
 
-    @SerialName("Cefuroxime (2nd generation)")
+    @SerialName("Cefuroxime2ndgeneration")
     val cefuroxime: Int?,
 
-    @SerialName("Cefpodoxime (3rd generation)")
+    @SerialName("Cefpodoxime3rdgeneration")
     val cefpodoxime: Int?,
 
-    @SerialName("Cefotaxime (3rd generation)")
+    @SerialName("Cefotaxime3rdgeneration")
     val cefotaxime: Int?,
 
-    @SerialName("Cefoperazone (3rd generation)")
+    @SerialName("Cefoperazone3rdgeneration")
     val cefoperazone: Int?,
 
-    @SerialName("Ceftriaxone (3rd generation)")
+    @SerialName("Ceftriaxone3rdgeneration")
     val ceftriaxone: Int?,
 
-    @SerialName("Ceftazidime (3rd generation)")
+    @SerialName("Ceftazidime3rdgeneration")
     val ceftazidime: Int?,
 
-    @SerialName("Cefepime (4th generation)")
+    @SerialName("Cefepime4thgeneration")
     val cefepime: Int?,
 
-    @SerialName("Ceftaroline (5th generation)")
+    @SerialName("Ceftaroline5thgeneration")
     val ceftaroline: Int?,
 
-    @SerialName("Cefiderocol (5th generation)")
+    @SerialName("Cefiderocol5thgeneration")
     val cefiderocol: Int?,
 
-    @SerialName("Cefoperazone sulbactam")
+    @SerialName("Cefoperazonesulbactam")
     val cefoperazoneSulbactam: Int?,
 
-    @SerialName("Ceftazidime-Avibactam")
+    @SerialName("CeftazidimeAvibactam")
     val ceftazidimeAvibactam: Int?,
 
     @SerialName("Ertapenem")
@@ -86,13 +86,13 @@ data class BacteriaRow(
     @SerialName("Aztreonam")
     val aztreonam: Int?,
 
-    @SerialName("Aztreonam-avibactam")
+    @SerialName("Aztreonamavibactam")
     val aztreonamAvibactam: Int?,
 
     @SerialName("Amikacin")
     val amikacin: Int?,
 
-    @SerialName("Gentamicin")
+    @SerialName("gentamicin")
     val gentamicin: Int?,
 
     @SerialName("Ciprofloxacin")
@@ -104,7 +104,7 @@ data class BacteriaRow(
     @SerialName("Moxifloxacin")
     val moxifloxacin: Int?,
 
-    @SerialName("TMP-SMX")
+    @SerialName("TMPSMX")
     val tmpSmx: Int?,
 
     @SerialName("Vancomycin")
@@ -146,9 +146,9 @@ data class BacteriaRow(
     @SerialName("Nitrofurantoin")
     val nitrofurantoin: Int?,
 
-    @SerialName("Fosfomycin (IV)")
+    @SerialName("FosfomycinIV")
     val fosfomycinIV: Int?,
 
-    @SerialName("Fosfomycin (PO)")
+    @SerialName("FosfomycinPO")
     val fosfomycinPO: Int?
 )

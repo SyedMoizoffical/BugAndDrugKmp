@@ -1,5 +1,6 @@
 package com.medical.buganddrug
 
+import platform.Foundation.NSBundle
 import platform.Photos.PHPhotoLibrary
 import platform.PhotosUI.PHPickerConfiguration
 import platform.PhotosUI.PHPickerFilter
@@ -12,6 +13,7 @@ class IOSPlatform: Platform {
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()
+actual fun getAppVersion(): String = (NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String) ?: "1.0.0"
 actual fun pickImages(
     onImagesPicked: (List<ByteArray>) -> Unit
 ) {

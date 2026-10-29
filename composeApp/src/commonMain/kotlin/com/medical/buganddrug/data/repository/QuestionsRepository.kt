@@ -15,6 +15,8 @@ import com.medical.buganddrug.data.model.QoestionsModel.Q8Model.GetAntibioticGen
 import com.medical.buganddrug.data.model.Survey.AppSurveyPostRequest
 import com.medical.buganddrug.data.model.hivCenterModel.HivArtCenter
 import com.medical.buganddrug.data.model.patientinfoModel.Data
+import com.medical.buganddrug.data.model.CheckVersionRequest
+import com.medical.buganddrug.data.model.CheckVersionResponse
 import com.medical.buganddrug.data.model.postExosureProplaxisModel.ExposureProPhylaxisModel
 import com.medical.buganddrug.data.remote.ApiService
 import com.medical.buganddrug.ui.onboarding.loginScreen.*
@@ -528,6 +530,18 @@ class QuestionsRepository (
             Result.success(response.statusCode)
         } catch (e: Exception) {
             Result.failure(Exception(e.toUserFriendlyMessage()))
+        }
+    }
+
+    suspend fun checkVersion(request: CheckVersionRequest): Result<CheckVersionResponse> {
+        if (networkChecker?.isNetworkAvailable() == false) {
+            return Result.failure(Exception(NetworkErrorHandler.NO_INTERNET_MESSAGE))
+        }
+        return try {
+            val response = api.checkVersion(request)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

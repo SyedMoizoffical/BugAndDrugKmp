@@ -95,6 +95,7 @@ fun PatientTypeSelectionScreen(
     val isLoading by authViewModel.loading.collectAsState()
     val errorMessage by authViewModel.errorMessage.collectAsState()
     val diseaseList by authViewModel.diseaseList.collectAsState()
+    val versionDialogState by authViewModel.versionDialogState.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
@@ -114,6 +115,7 @@ fun PatientTypeSelectionScreen(
 
     LaunchedEffect(Unit) {
         authViewModel.printExtractedDiseaseList()
+        authViewModel.checkVersionIfDataExists()
     }
 
     ModalNavigationDrawer(
@@ -487,6 +489,80 @@ fun PatientTypeSelectionScreen(
                 )
             }
 
+            versionDialogState?.let { state ->
+                AlertDialog(
+                    onDismissRequest = { authViewModel.dismissVersionDialog() },
+                    title = {
+                        Text(
+                            text = when {
+                                state.isAppUpdateRequired -> "App Update Available"
+                                state.isDataUpdateRequired -> "Clinical Data Updated"
+                                else -> "System Notice"
+                            },
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    text = {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            if (!state.message.isNullOrBlank()) {
+                                Text(
+                                    text = state.message,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
+                            if (!state.releaseNotes.isNullOrBlank()) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            text = "Release Notes",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = state.releaseNotes,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (state.latestAppVersion != null && state.isAppUpdateRequired) {
+                                Text(
+                                    text = "Latest App Version: ${state.latestAppVersion}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = { authViewModel.dismissVersionDialog() },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF6750A4)
+                            )
+                        ) {
+                            Text("OK", color = Color.White)
+                        }
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            }
+
             selectedDiseaseForDialog?.let { disease ->
                 var showContent by remember(disease) { mutableStateOf(true) }
 
@@ -505,6 +581,7 @@ fun PatientTypeSelectionScreen(
                     onDismissRequest = animateDismiss,
                     properties = DialogProperties(
                         usePlatformDefaultWidth = false,
+//                        decorFitsSystemWindows = false,
                         dismissOnBackPress = true,
                         dismissOnClickOutside = false
                     )

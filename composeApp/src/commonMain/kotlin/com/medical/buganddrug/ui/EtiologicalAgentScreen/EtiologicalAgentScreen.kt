@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -147,7 +146,7 @@ fun EtiologicalAgentScreen(
                                             modifier = Modifier.size(44.dp)
                                         )
                                         Spacer(modifier = Modifier.width(10.dp))
-                                        Column {
+                                        Column(modifier = Modifier.weight(1f)) {
                                             Text(
                                                 text = selectedIsolation.organism ?: "Organism Details",
                                                 style = MaterialTheme.typography.titleMedium.copy(
@@ -168,11 +167,7 @@ fun EtiologicalAgentScreen(
 
                                     Spacer(modifier = Modifier.height(12.dp))
 
-                                    LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                        item {
-                                            IsolationDetailCard(selectedIsolation)
-                                        }
-                                    }
+                                    IsolationDetailCard(selectedIsolation)
                                 }
                             }
                         }else
@@ -276,6 +271,7 @@ private fun InfoRow(label: String, value: String) {
         if (value == "N/A") {
             Text(
                 text = "N/A",
+                modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = Color(0xFF9E9E9E),
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
@@ -284,6 +280,7 @@ private fun InfoRow(label: String, value: String) {
         } else {
             com.medical.buganddrug.util.ClickableDiseaseText(
                 text = value,
+                modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = Color(0xFF1E293B),
                     lineHeight = 22.sp

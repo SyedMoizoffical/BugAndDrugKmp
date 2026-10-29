@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -181,7 +180,7 @@ fun EtiologicalAgentFilterScreen(
                                             modifier = Modifier.size(44.dp)
                                         )
                                         Spacer(modifier = Modifier.width(10.dp))
-                                        Column {
+                                        Column(modifier = Modifier.weight(1f)) {
                                             Text(
                                                 text = selectedIsolation.organism ?: effectiveOrganismName ?: "Organism Details",
                                                 style = MaterialTheme.typography.titleMedium.copy(
@@ -202,11 +201,7 @@ fun EtiologicalAgentFilterScreen(
 
                                     Spacer(modifier = Modifier.height(12.dp))
 
-                                    LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                        item {
-                                            IsolationDetailCard(selectedIsolation)
-                                        }
-                                    }
+                                    IsolationDetailCard(selectedIsolation)
                                 }
                             }
                         }else
@@ -299,17 +294,19 @@ fun IsolationDetailCard(option: EtilogicalAgent?) {
 
 @Composable
 fun InfoRow(label: String, value: String) {
-    Column {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary
+            color = Color(0xFF800080),
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(4.dp))
         if (value == "N/A") {
             Text(
                 text = "N/A",
+                modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = Color(0xFF9E9E9E),
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
@@ -318,15 +315,16 @@ fun InfoRow(label: String, value: String) {
         } else {
             com.medical.buganddrug.util.ClickableDiseaseText(
                 text = value,
+                modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color(0xFF1E293B),
                     lineHeight = 22.sp
                 )
             )
         }
         Spacer(modifier = Modifier.height(6.dp))
         HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            color = Color(0xFFE2E8F0),
             thickness = 0.5.dp,
             modifier = Modifier.padding(vertical = 4.dp)
         )

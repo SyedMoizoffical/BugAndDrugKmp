@@ -167,6 +167,14 @@ class ApiService(
         return client.post("GetInitialAppData").body()
     }
 
+    suspend fun checkVersion(request: CheckVersionRequest): CheckVersionResponse {
+        return client.post("check-version") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+
 
     suspend fun postBugReport(
         description: String,

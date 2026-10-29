@@ -127,7 +127,7 @@ fun DisclaimerDialog(onDismiss: () -> Unit) {
 
                         "6. Contact Information\n" +
                                 "Email: bug.drug@duhs.edu.pk\n" +
-                                "Organization: Dow University of Health Sciences, Karachi."
+                                "Organization: Sindh Infectious Diseases Hospital and Research Centre/ Dow University of Health Sciences, Karachi."
                     )
 
                     // Split each point into lines and color only headings

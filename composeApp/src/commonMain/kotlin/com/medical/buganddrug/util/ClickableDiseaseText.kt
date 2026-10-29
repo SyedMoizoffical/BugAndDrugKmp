@@ -115,7 +115,9 @@ fun ClickableDiseaseText(
                 onDismissRequest = animateDismiss,
                 properties = DialogProperties(
                     usePlatformDefaultWidth = false,
+//                    decorFitsSystemWindows = false,
                     dismissOnBackPress = true,
+
                     dismissOnClickOutside = false
                 )
             ) {

@@ -7,6 +7,7 @@ class AndroidPlatform : Platform {
 }
 
 actual fun getPlatform(): Platform = AndroidPlatform()
+actual fun getAppVersion(): String = "1.0.1"
 actual fun pickImages(
     onImagesPicked: (List<ByteArray>) -> Unit
 ) {

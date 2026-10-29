@@ -57,6 +57,14 @@ class SharedPreferenceManager(
         settings.remove("patientToken")
     }
 
+    fun saveDataVersion(version: Int) {
+        settings.putInt("dataVersion", version)
+    }
+
+    fun getDataVersion(): Int {
+        return settings.getInt("dataVersion", 0)
+    }
+
     fun clearAll() {
         settings.clear()
     }

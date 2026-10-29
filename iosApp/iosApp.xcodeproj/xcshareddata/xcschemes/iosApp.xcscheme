@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3D6BC12618F2DBD28FE24FDC"
-               BuildableName = "buganddrug_multiplateform.app"
+               BuildableName = "Bug &amp; Drug.app"
                BlueprintName = "iosApp"
                ReferencedContainer = "container:iosApp.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3D6BC12618F2DBD28FE24FDC"
-            BuildableName = "buganddrug_multiplateform.app"
+            BuildableName = "Bug &amp; Drug.app"
             BlueprintName = "iosApp"
             ReferencedContainer = "container:iosApp.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3D6BC12618F2DBD28FE24FDC"
-            BuildableName = "buganddrug_multiplateform.app"
+            BuildableName = "Bug &amp; Drug.app"
             BlueprintName = "iosApp"
             ReferencedContainer = "container:iosApp.xcodeproj">
          </BuildableReference>
